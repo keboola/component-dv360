@@ -2,10 +2,10 @@
 Template Component main class.
 
 """
-import csv
 import logging
-from datetime import datetime
 
+from google_auth_oauthlib.flow import Flow
+from googleapiclient import discovery
 from keboola.component.base import ComponentBase
 from keboola.component.exceptions import UserException
 
@@ -35,42 +35,46 @@ class Component(ComponentBase):
 
     def run(self):
         """
-        Main execution code
+        BDM example auth
         """
+        token_response = self.configuration.oauth_credentials.data
 
-        # ####### EXAMPLE TO REMOVE
-        # check for missing configuration parameters
-        self.validate_configuration_parameters(REQUIRED_PARAMETERS)
-        self.validate_image_parameters(REQUIRED_IMAGE_PARS)
-        params = self.configuration.parameters
-        # Access parameters in data/config.json
-        if params.get(KEY_PRINT_HELLO):
-            logging.info("Hello World")
+        # this has to be set to something low to force refresh and make the oAuthlib2 work.
+        token_response['expires_at'] = 22222
+        # Google secrets format
+        client_secrets = {
+            "web": {
+                "client_id": self.configuration.oauth_credentials.appKey,
+                "client_secret": self.configuration.oauth_credentials.appSecret,
+                "redirect_uris": ["https://www.example.com/oauth2callback"],
+                "auth_uri": "https://oauth2.googleapis.com/auth",
+                "token_uri": "https://oauth2.googleapis.com/token"
+            }
+        }
 
-        # get last state data/in/state.json from previous run
-        previous_state = self.get_state_file()
-        logging.info(previous_state.get('some_state_parameter'))
+        scopes = ['https://www.googleapis.com/auth/doubleclickbidmanager']
+        credentials = Flow.from_client_config(client_secrets, scopes=scopes, token=token_response).credentials
 
-        # Create output table (Tabledefinition - just metadata)
-        table = self.create_out_table_definition('output.csv', incremental=True, primary_key=['timestamp'])
+        # Build the discovery document URL.
+        discovery_url = 'https://doubleclickbidmanager.googleapis.com/$discovery/rest?version=v2'
 
-        # get file path of the table (data/out/tables/Features.csv)
-        out_table_path = table.full_path
-        logging.info(out_table_path)
+        # Build the API service.
+        service = discovery.build(
+            'doubleclickbidmanager',
+            'v2',
+            discoveryServiceUrl=discovery_url,
+            credentials=credentials)
 
-        # DO whatever and save into out_table_path
-        with open(table.full_path, mode='wt', encoding='utf-8', newline='') as out_file:
-            writer = csv.DictWriter(out_file, fieldnames=['timestamp'])
-            writer.writeheader()
-            writer.writerow({"timestamp": datetime.now().isoformat()})
+        # Build and execute queries.listqueries request.
+        response = service.queries().list(pageSize='10').execute()
 
-        # Save table manifest (output.csv.manifest) from the tabledefinition
-        self.write_manifest(table)
-
-        # Write new state - will be available next run
-        self.write_state_file({"some_state_parameter": "value"})
-
-        # ####### EXAMPLE TO REMOVE END
+        # Print queries out.
+        if 'queries' in response:
+            print('Id\t\tName')
+            for query in response['queries']:
+                print('%s\t%s' % (query['queryId'], query['metadata']['title']))
+        else:
+            print('No queries exist.')
 
 
 """
