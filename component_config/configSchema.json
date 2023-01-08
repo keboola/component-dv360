@@ -12,6 +12,14 @@
       "minLength": 1,
       "propertyOrder": 50
     },
+    "elements": {
+      "type": "array",
+      "title": "Elements",
+      "items": {
+        "type": "string"
+      },
+      "propertyOrder": 60
+    },
     "print_hello": {
       "type": "boolean",
       "title": "Print Hello",
