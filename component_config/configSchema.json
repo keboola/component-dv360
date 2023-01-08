@@ -1,19 +1,26 @@
 {
   "type": "object",
-  "title": "extractor configuration",
+  "title": "Extractor configuration",
   "required": [
+    "user_name",
     "print_hello"
   ],
   "properties": {
+    "user_name": {
+      "type": "string",
+      "title": "Your user name",
+      "minLength": 1,
+      "propertyOrder": 50
+    },
     "print_hello": {
       "type": "boolean",
       "title": "Print Hello",
-      "propertyOrder": 1
+      "propertyOrder": 100
     },
     "debug": {
       "type": "boolean",
       "title": "Debug",
-      "propertyOrder": 2
+      "propertyOrder": 200
     }
   }
 }
