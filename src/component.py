@@ -66,7 +66,60 @@ class Component(ComponentBase):
             credentials=credentials)
 
         # Build and execute queries.listqueries request.
-        response = service.queries().list(pageSize='10').execute()
+
+        query = {
+            "metadata": {
+                "title": "My_2nd_query",
+                "format": "CSV",
+                "dataRange": {
+                    "range": "LAST_7_DAYS"
+                }
+            },
+            "params": {
+                "type": "STANDARD",
+                "groupBys": [
+                    "FILTER_ADVERTISER_NAME",
+                    "FILTER_PARTNER_NAME",
+                    "FILTER_MEDIA_PLAN_NAME",
+                    "FILTER_BROWSER",
+                    "FILTER_COUNTRY"
+                ],
+                "metrics": [
+                    "METRIC_IMPRESSIONS",
+                    "METRIC_CLICKS",
+                    "METRIC_CTR",
+                    "METRIC_TOTAL_CONVERSIONS"
+                ],
+                "filters": [
+                ]
+            },
+            "schedule": {
+                "frequency": "ONE_TIME"
+            }
+        }
+
+        # q = service.queries()
+        # m = q.delete(queryId=1047383473)
+        # response = m.execute()
+
+        body = {
+            "dataRange": {
+                # "range": "PREVIOUS_YEAR"
+                "range": "LAST_7_DAYS"
+            }
+        }
+
+        # m = q.run(body=body, queryId=1047383473, synchronous=True)
+
+        rl = service.queries().reports()
+        m = rl.list(queryId=1047383473)
+
+
+        response = m.execute()
+
+        print(response)
+
+        response = service.queries().list(pageSize='100').execute()
 
         # Print queries out.
         if 'queries' in response:
