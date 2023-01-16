@@ -13,7 +13,8 @@
         "Report specification",
         "Existing report ID"
       ],
-      "default": "Report specification"
+      "default": "Report specification",
+      "propertyOrder": 100
     },
     "period": {
       "title": "Report Period",
@@ -38,7 +39,8 @@
         "Previous 90 days excl. current day",
         "Previous 365 days excl. current day",
         "All times excl. current day"
-      ]
+      ],
+      "propertyOrder": 200
     },
     "date_from": {
       "title": "Date from",
@@ -48,7 +50,8 @@
         "dependencies": {
           "period": "Custom range"
         }
-      }
+      },
+      "propertyOrder": 300
     },
     "date_to": {
       "title": "Date to",
@@ -58,7 +61,8 @@
         "dependencies": {
           "period": "Custom range"
         }
-      }
+      },
+      "propertyOrder": 400
     },
     "entry_repo": {
       "type": "object",
@@ -77,7 +81,8 @@
             "YouTube Programmatic Guaranteed",
             "Reach",
             "Unique Reach Audience"
-          ]
+          ],
+          "propertyOrder": 500
         },
         "dimensions": {
           "title": "Filters (aka dimensions)",
@@ -386,7 +391,8 @@
               "Zip Code ID",
               "Zip Code"
             ]
-          }
+          },
+          "propertyOrder": 600
         },
         "metrics": {
           "title": "Metrics",
@@ -905,7 +911,8 @@
               "Targeted Impressions (Line Item)",
               "Win Rate"
             ]
-          }
+          },
+          "propertyOrder": 700
         },
         "filters": {
           "type": "array",
@@ -1223,7 +1230,8 @@
                 "type": "string"
               }
             }
-          }
+          },
+          "propertyOrder": 800
         }
       },
       "options": {
