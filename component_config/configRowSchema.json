@@ -12,10 +12,16 @@
       "propertyOrder": 100,
       "description": "You may choose to either define a new report or to enter existing report ID",
       "enum": [
-        "Report specification",
-        "Existing report ID"
+        "entry_repo",
+        "entry_id"
       ],
-      "default": "Report specification"
+      "options": {
+        "enum_titles": [
+          "Report specification",
+          "Existing report ID"
+        ]
+      },
+      "default": "entry_repo"
     },
     "time_range": {
       "type": "object",
@@ -2364,7 +2370,7 @@
       },
       "options": {
         "dependencies": {
-          "input_variant": "Report specification"
+          "input_variant": "entry_repo"
         }
       }
     },
@@ -2376,7 +2382,7 @@
       "description": "Enter report ID as presented in DV360 Report Builder",
       "options": {
         "dependencies": {
-          "input_variant": "Existing report ID"
+          "input_variant": "entry_id"
         }
       }
     }
