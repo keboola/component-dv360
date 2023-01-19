@@ -6,67 +6,75 @@
   ],
   "properties": {
     "input_variant": {
-      "title": "Input variant",
       "type": "string",
+      "title": "Input variant",
+      "propertyOrder": 100,
       "description": "You may choose to either define a new report or to enter existing report ID",
       "enum": [
         "Report specification",
         "Existing report ID"
       ],
-      "default": "Report specification",
-      "propertyOrder": 100
+      "default": "Report specification"
     },
-    "period": {
-      "title": "Report Period",
-      "type": "string",
-      "default": "Previous 7 days excl. current day",
-      "enum": [
-        "Custom range",
-        "Current day",
-        "Previous day",
-        "All days since Sunday incl. current day",
-        "All days since current month incl. current day",
-        "All days since current quarter incl. current day",
-        "All days since current year incl. current day",
-        "Previous week beginning from Sunday",
-        "Previous calendar month",
-        "Previous quarter",
-        "Previous year",
-        "Previous 7 days excl. current day",
-        "Previous 14 days excl. current day",
-        "Previous 30 days excl. current day",
-        "Previous 60 days excl. current day",
-        "Previous 90 days excl. current day",
-        "Previous 365 days excl. current day",
-        "All times excl. current day"
-      ],
-      "propertyOrder": 200
-    },
-    "date_from": {
-      "title": "Date from",
-      "type": "string",
-      "description": "Start date of the report. Either date in YYYY-MM-DD format or a relative date string i.e. 5 days ago, 1 month ago, yesterday, etc. Can also be specified as `last run` to start the reporting period at the time of last extraction (this cannot be done in case of the first run for obvious reasons).",
-      "options": {
-        "dependencies": {
-          "period": "Custom range"
+    "time_range": {
+      "type": "object",
+      "title": "Time Range",
+      "propertyOrder": 200,
+      "properties": {
+        "period": {
+          "type": "string",
+          "title": "Report Period",
+          "propertyOrder": 10,
+          "default": "Previous 7 days excl. current day",
+          "enum": [
+            "Custom range",
+            "Current day",
+            "Previous day",
+            "All days since Sunday incl. current day",
+            "All days since current month incl. current day",
+            "All days since current quarter incl. current day",
+            "All days since current year incl. current day",
+            "Previous week beginning from Sunday",
+            "Previous calendar month",
+            "Previous quarter",
+            "Previous year",
+            "Previous 7 days excl. current day",
+            "Previous 14 days excl. current day",
+            "Previous 30 days excl. current day",
+            "Previous 60 days excl. current day",
+            "Previous 90 days excl. current day",
+            "Previous 365 days excl. current day",
+            "All times excl. current day"
+          ]
+        },
+        "date_from": {
+          "type": "string",
+          "title": "Date from",
+          "propertyOrder": 20,
+          "description": "Start date of the report. Either date in YYYY-MM-DD format or a relative date string i.e. 5 days ago, 1 month ago, yesterday, etc. Can also be specified as `last run` to start the reporting period at the time of last extraction (this cannot be done in case of the first run for obvious reasons).",
+          "options": {
+            "dependencies": {
+              "period": "Custom range"
+            }
+          }
+        },
+        "date_to": {
+          "type": "string",
+          "title": "Date to",
+          "propertyOrder": 30,
+          "description": "Start date of the report. Either date in YYYY-MM-DD format or a relative date string i.e. 5 days ago, 1 month ago, yesterday, etc. Can also be specified as `last run` to start the reporting period at the time of last extraction (this cannot be done in case of the first run for obvious reasons).",
+          "options": {
+            "dependencies": {
+              "period": "Custom range"
+            }
+          }
         }
-      },
-      "propertyOrder": 300
-    },
-    "date_to": {
-      "title": "Date to",
-      "type": "string",
-      "description": "Start date of the report. Either date in YYYY-MM-DD format or a relative date string i.e. 5 days ago, 1 month ago, yesterday, etc. Can also be specified as `last run` to start the reporting period at the time of last extraction (this cannot be done in case of the first run for obvious reasons).",
-      "options": {
-        "dependencies": {
-          "period": "Custom range"
-        }
-      },
-      "propertyOrder": 400
+      }
     },
     "entry_repo": {
       "type": "object",
       "title": "Report Details",
+      "propertyOrder": 300,
       "properties": {
         "report_type": {
           "title": "Report Type",
@@ -1243,6 +1251,7 @@
     "entry_id": {
       "type": "string",
       "title": "Report ID",
+      "propertyOrder": 400,
       "description": "Enter report ID as presented in DV360 Report Builder",
       "options": {
         "dependencies": {
