@@ -12,7 +12,7 @@
       "propertyOrder": 100,
       "description": "You may choose to either define a new report or to enter existing report ID",
       "enum": [
-        "entry_repo",
+        "report_settings",
         "entry_id"
       ],
       "options": {
@@ -21,7 +21,7 @@
           "Existing report ID"
         ]
       },
-      "default": "entry_repo"
+      "default": "report_settings"
     },
     "time_range": {
       "type": "object",
@@ -100,7 +100,7 @@
         }
       }
     },
-    "entry_repo": {
+    "report_settings": {
       "type": "object",
       "title": "Report Details",
       "propertyOrder": 300,
@@ -2392,7 +2392,7 @@
       },
       "options": {
         "dependencies": {
-          "input_variant": "entry_repo"
+          "input_variant": "report_settings"
         }
       }
     },
@@ -2405,6 +2405,54 @@
       "options": {
         "dependencies": {
           "input_variant": "entry_id"
+        }
+      }
+    },
+    "destination": {
+      "title": "Destination",
+      "type": "object",
+      "propertyOrder": 600,
+      "required": [
+        "primary_key",
+        "load_type"
+      ],
+      "properties": {
+        "primary_key": {
+          "type": "array",
+          "title": "Primary Key",
+          "propertyOrder": 10,
+          "format": "select",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "watch": {
+              "dims": "report_settings.dimensions"
+            },
+            "enumSource": [
+              {
+                "source": "dims",
+                "value": "{{item}}",
+                "title": "{{item}}"
+              }
+            ]
+          }
+        },
+        "load_type": {
+          "type": "string",
+          "title": "Load Type",
+          "propertyOrder": 20,
+          "enum": [
+            "full_load",
+            "incremental_load"
+          ],
+          "options": {
+            "enum_titles": [
+              "Full Load",
+              "Incremental Load"
+            ]
+          },
+          "default": "incremental_load",
+          "description": "If Full load is used, the destination table will be overwritten every run. If Incremental load is used, data will be upserted into the destination table."
         }
       }
     }
