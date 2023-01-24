@@ -2426,15 +2426,9 @@
           "items": {
             "type": "string",
             "watch": {
-              "dims": "report_settings.dimensions"
+              "dim": "report_settings.dimensions"
             },
-            "enumSource": [
-              {
-                "source": "dims",
-                "value": "{{item}}",
-                "title": "{{item}}"
-              }
-            ]
+            "enumSource": "dim"
           }
         },
         "load_type": {
