@@ -109,16 +109,33 @@
           "title": "Report Type",
           "type": "string",
           "enum": [
-            "Standard",
-            "Inventory Availability",
-            "Audience Composition",
-            "Floodlight",
-            "YouTube",
+            "STANDARD",
+            "INVENTORY_AVAILABILITY",
+            "AUDIENCE_COMPOSITION",
+            "FLOODLIGHT",
+            "YOUTUBE",
             "GRP",
-            "YouTube Programmatic Guaranteed",
-            "Reach",
-            "Unique Reach Audience"
+            "YOUTUBE_PROGRAMMATIC_GUARANTEED",
+            "REACH",
+            "UNIQUE_REACH_AUDIENCE",
+            "FULL_PATH",
+            "PATH_ATTRIBUTION"
           ],
+          "options": {
+            "enum_titles": [
+              "Standard",
+              "Inventory Availability",
+              "Audience Composition",
+              "Floodlight",
+              "YouTube",
+              "GRP",
+              "YouTube Programmatic Guaranteed",
+              "Reach",
+              "Unique Reach Audience",
+              "Full Path",
+              "Path Attribution"
+            ]
+          },
           "propertyOrder": 500
         },
         "dimensions": {
@@ -1769,6 +1786,7 @@
           "type": "array",
           "title": "Filters",
           "propertyOrder": 800,
+          "format": "table",
           "items": {
             "type": "object",
             "title": "Filter",
@@ -2417,9 +2435,9 @@
         "load_type"
       ],
       "properties": {
-        "primary_key": {
+        "primary_keys": {
           "type": "array",
-          "title": "Primary Key",
+          "title": "Primary Keys",
           "propertyOrder": 10,
           "format": "select",
           "uniqueItems": true,
