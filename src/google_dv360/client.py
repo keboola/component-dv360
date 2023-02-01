@@ -40,7 +40,11 @@ class GoogleDV360Client:
     def test_connection(self):
         pass
 
-    def create_report(self, report_type: str, dimensions: List[str], metrics: List[str], filters: List[Tuple[str, str]]) -> str:
+    def create_report(self,
+                      report_type: str,
+                      dimensions: List[str],
+                      metrics: List[str],
+                      filters: List[Tuple[str, str]]) -> str:
         """
 
         Args:

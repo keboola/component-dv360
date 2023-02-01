@@ -87,7 +87,8 @@ _filter_table = {
     "FILTER_DMA_NAME": "DMA",
     "FILTER_DOMAIN": "Domain",
     "FILTER_ELIGIBLE_COOKIES_ON_FIRST_PARTY_AUDIENCE_LIST": "Eligible Cookies on First-Party Audience List",
-    "FILTER_ELIGIBLE_COOKIES_ON_THIRD_PARTY_AUDIENCE_LIST_AND_INTEREST": "Eligible Cookies on Third-Party Audience List and Interest",
+    "FILTER_ELIGIBLE_COOKIES_ON_THIRD_PARTY_AUDIENCE_LIST_AND_INTEREST":
+        "Eligible Cookies on Third-Party Audience List and Interest",
     "FILTER_EVENT_TYPE": "Event Type",
     "FILTER_EXCHANGE": "Exchange",
     "FILTER_EXCHANGE_CODE": "Exchange Code",

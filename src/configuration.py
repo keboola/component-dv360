@@ -122,14 +122,15 @@ if __name__ == '__main__':
         ],
         "load_type": "incremental_load"
       },
-      "debug": true
+      "debug": true,
+      "dalsi_parametr": 12
     }
         """
 
-    # cf1 = dataconf.loads(json_conf_1, Configuration)
-    # cf2 = dataconf.loads(json_conf_2, Configuration)
-    #
-    # print(f'Equality cf1 == cf2 {cf1 == cf2}')
+    cf1 = dataconf.loads(json_conf_1, Configuration)
+    cf2 = dataconf.loads(json_conf_2, Configuration, ignore_unexpected=True)
+
+    print(f'Equality cf1 == cf2 {cf1 == cf2}')
 
     pars = {
         "input_variant": "report_settings",

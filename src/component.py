@@ -3,7 +3,7 @@ Template Component main class.
 
 """
 import logging
-from typing import List, Tuple
+# from typing import List, Tuple
 
 # from google_auth_oauthlib.flow import Flow
 # from googleapiclient import discovery
