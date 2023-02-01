@@ -50,6 +50,8 @@ class Component(ComponentBase):
         BDM example auth
         """
 
+        logging.debug(self.environment_variables)
+
         logging.debug(self.configuration.parameters)
 
         self.cfg = Configuration.fromDict(self.configuration.parameters)
