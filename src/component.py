@@ -40,9 +40,7 @@ class Component(ComponentBase):
         r = contents.split('\n,', 2)
         csv_contents = r[0]
         pks = translate_filters(self.cfg.destination.primary_keys)
-        result_table = self.create_out_table_definition('report.csv',
-                                                        primary_key=pks,
-                                                        incremental=self.cfg.destination.load_type)
+        result_table = self.create_out_table_definition('report.csv', primary_key=pks, incremental=True)
         self.write_manifest(result_table)
         with open(result_table.full_path, 'w') as result:
             result.write(csv_contents)
@@ -53,6 +51,8 @@ class Component(ComponentBase):
         """
 
         self.cfg = Configuration.fromDict(self.configuration.parameters)
+
+        logging.debug(self.configuration.parameters)
 
         client = GoogleDV360Client(self.configuration.oauth_credentials)
 
