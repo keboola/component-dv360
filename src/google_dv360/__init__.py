@@ -1,4 +1,4 @@
-from .client import GoogleDV360Client, GoogleDV360ClientException
+from .client import GoogleDV360Client, GoogleDV360ClientException  # noqa F401
 
 _filter_table = {
     "FILTER_ACTIVE_VIEW_CUSTOM_METRIC_ID": "Active View: Custom Metric ID",
