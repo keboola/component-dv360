@@ -41,7 +41,7 @@ class ConfigurationBase:
 
     @staticmethod
     def fromDict(parameters: dict):
-        return dataconf.dict(parameters, Configuration)
+        return dataconf.dict(parameters, Configuration, ignore_unexpected=True)
         pass
 
 

@@ -50,9 +50,11 @@ class Component(ComponentBase):
         BDM example auth
         """
 
+        logging.debug(self.configuration.parameters)
+
         self.cfg = Configuration.fromDict(self.configuration.parameters)
 
-        logging.debug(self.configuration.parameters)
+        logging.debug(self.cfg)
 
         client = GoogleDV360Client(self.configuration.oauth_credentials)
 
