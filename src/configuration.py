@@ -1,5 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import dataconf
+
+from pyhocon.config_tree import ConfigTree
 
 from keboola.component.exceptions import UserException
 
@@ -29,19 +31,28 @@ class TimeRange:
 
 @dataclass
 class ReportSettings:
-    report_type: str = None
+    report_type: str = ""
     dimensions: list[str] = None
     metrics: list[str] = None
     filters: list[FilterPair] = None
 
 
+class ConfigurationBase:
+
+    @staticmethod
+    def fromDict(parameters: dict):
+        return dataconf.dict(parameters, Configuration)
+        pass
+
+
 @dataclass
-class Configuration:
+class Configuration(ConfigurationBase):
     input_variant: str
     destination: Destination
     time_range: TimeRange
+    report_settings: ReportSettings = field(default_factory=lambda: ConfigTree({}))
     entry_id: str = ""
-    report_settings: ReportSettings = ReportSettings()
+    debug: bool = False
 
     def __eq__(self, other):
         if self.input_variant == "entry_id":
@@ -110,13 +121,32 @@ if __name__ == '__main__':
           "FILTER_BROWSER"
         ],
         "load_type": "incremental_load"
-      }
+      },
+      "debug": true
     }
         """
 
-    cf1 = dataconf.loads(json_conf_1, Configuration)
-    cf2 = dataconf.loads(json_conf_2, Configuration)
+    # cf1 = dataconf.loads(json_conf_1, Configuration)
+    # cf2 = dataconf.loads(json_conf_2, Configuration)
+    #
+    # print(f'Equality cf1 == cf2 {cf1 == cf2}')
 
-    print(f'Equality cf1 == cf2 {cf1 == cf2}')
+    pars = {
+        "input_variant": "report_settings",
+        "time_range": {
+            "period": "LAST_90_DAYS",
+            "date_from": "yesterday",
+            "date_to": "dneska"
+        },
+        "destination": {
+            "primary_keys": [
+                "FILTER_ADVERTISER",
+                "FILTER_BROWSER"
+            ],
+            "load_type": "incremental_load"
+        }
+    }
+
+    cf3 = Configuration.fromDict(pars)
 
     pass

@@ -1,6 +1,7 @@
 import logging
 import time
 from typing import List, Tuple
+import requests
 
 from google_auth_oauthlib.flow import Flow
 from googleapiclient import discovery
@@ -39,7 +40,7 @@ class GoogleDV360Client:
     def test_connection(self):
         pass
 
-    def create_report(self, report_type: str, dimensions: List[str], metrics: List[str], filters: List[Tuple[str,str]]) -> str:
+    def create_report(self, report_type: str, dimensions: List[str], metrics: List[str], filters: List[Tuple[str, str]]) -> str:
         """
 
         Args:
@@ -96,8 +97,8 @@ class GoogleDV360Client:
             logging.info(f"Report state : {state}")
             if state == 'DONE':
                 url = response['metadata']['googleCloudStoragePath']
-
-                return url
+                resp_report = requests.get(url)
+                return resp_report.text
             if state == 'FAILED':
                 # TODO: more elaborate exception description
                 raise GoogleDV360ClientException('report failed')
