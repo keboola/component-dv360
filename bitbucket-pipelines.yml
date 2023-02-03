@@ -7,7 +7,7 @@ pipelines:
         caches:
           - docker
         script:
-          - export APP_IMAGE=$APP_IMAGE
+          - export APP_IMAGE=keboola-component
           - export TAG=${BITBUCKET_BRANCH//\//-}
           - docker build . --tag=$APP_IMAGE
           - docker images
@@ -29,7 +29,7 @@ pipelines:
           caches:
             - docker
           script:
-            - export APP_IMAGE=$APP_IMAGE
+            - export APP_IMAGE=keboola-component
             - export TAG=${BITBUCKET_BRANCH//\//-}
             - docker build . --tag=$APP_IMAGE
             - docker images
