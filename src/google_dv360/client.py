@@ -1,7 +1,7 @@
 import logging
 import time
 from typing import List, Tuple
-import requests
+import dateparser
 
 from google_auth_oauthlib.flow import Flow
 from googleapiclient import discovery
@@ -12,7 +12,38 @@ class GoogleDV360ClientException(UserException):
     pass
 
 
-# TODO: Employ logging
+def get_date_period_converted(period_from: str, period_to: str) -> Tuple[dict, dict]:
+    """
+    Returns given period parameters in datetime format, or next step in back-fill mode
+    along with generated last state for next iteration.
+
+    :param period_from: str YYYY-MM-DD or relative string supported by date parser e.g. 5 days ago
+    :param period_to: str YYYY-MM-DD or relative string supported by date parser e.g. 5 days ago
+
+    :return: start_date: datetime, end_date: datetime
+    """
+
+    start_date_form = dateparser.parse(period_from)
+    end_date_form = dateparser.parse(period_to)
+    if not start_date_form or not end_date_form:
+        raise UserException("Error with dates, make sure both start and end date are defined properly")
+    day_diff = (end_date_form - start_date_form).days
+    if day_diff < 0:
+        raise UserException("start_date cannot exceed end_date.")
+
+    start = dict(
+        year=start_date_form.year,
+        month=start_date_form.month,
+        day=start_date_form.day)
+
+    end = dict(
+        year=end_date_form.year,
+        month=end_date_form.month,
+        day=end_date_form.day)
+
+    return start, end
+
+
 class GoogleDV360Client:
     def __init__(self, oauth_credentials):
         self.service = None
@@ -38,9 +69,11 @@ class GoogleDV360Client:
             credentials=credentials)
 
     def test_connection(self):
+        # TODO: implement
         pass
 
     def create_report(self,
+                      report_name: str,
                       report_type: str,
                       dimensions: List[str],
                       metrics: List[str],
@@ -48,17 +81,18 @@ class GoogleDV360Client:
         """
 
         Args:
-            report_type:
-            dimensions:
-            metrics:
-            filters:
+            report_name: A query name that will be stored in dv360 service
+            report_type: One of dv360 predefined report types
+            dimensions: Selection of dimensions (group by filters in dv360 terminology) to include
+            metrics: Selection dv360 metrics to include
+            filters: List of filter pairs to limit source data
 
         Returns:
 
         """
         body = {
             "metadata": {
-                "title": "generated_report",
+                "title": report_name,
                 "format": "CSV",
                 "dataRange": {
                     "range": "PREVIOUS_DAY"
@@ -82,31 +116,33 @@ class GoogleDV360Client:
     def run_report(self, report_id: str, data_range: str, date_from=None, date_to=None):
         body = {
             "dataRange": {
-                # TODO: Complete date_from x date_to handling in case of 'CUSTOM_DATES' data_range
                 "range": data_range
             }
         }
+        if data_range == 'CUSTOM_DATES':
+            body["dataRange"]["customStartDate"], body["dataRange"]["customEndDate"] = get_date_period_converted(
+                date_from, date_to)
+
         m = self.service.queries().run(body=body, queryId=report_id)
         response = m.execute()
         run_id = response['key']['reportId']
         logging.info(f"Running query : {report_id}:{run_id}")
         return run_id
 
-    def wait_report(self, report_id: str, run_id: str) -> str:
+    def wait_report(self, report_id: str, run_id: str) -> dict:
         m = self.service.queries().reports().get(queryId=report_id, reportId=run_id)
-        # TODO: Repeat execute until we get some final state or until timeout (not yet introduced)
-        while True:
+        while True:  # TODO: consider some timeout - currently we terminate on 'DONE' or abort on error
             response = m.execute()
             state = response['metadata']['status']['state']
             logging.info(f"Report state : {state}")
             if state == 'DONE':
-                url = response['metadata']['googleCloudStoragePath']
-                resp_report = requests.get(url)
-                return resp_report.text
+                return response
+                # url = response['metadata']['googleCloudStoragePath']
+                # # TODO: employ streaming get
+                # resp_report = requests.get(url)
+                # return resp_report.text
             if state == 'FAILED':
-                # TODO: more elaborate exception description
-                raise GoogleDV360ClientException('report failed')
-            # TODO: some exponential time wait time handling
+                raise GoogleDV360ClientException(f'report failed: {response["metadata"]}')
             time.sleep(30)
 
     def list_queries(self) -> list[(str, str)]:
@@ -115,3 +151,21 @@ class GoogleDV360Client:
             return [(query['queryId'], query['metadata']['title']) for query in response['queries']]
         else:
             return []
+
+    def get_query(self, query_id: str) -> object | None:
+        """ Search for specific query
+
+        If query exists corresponding dv360 object will be returned.
+
+        Args:
+            query_id: Query ID to search for
+
+        Returns: dv360 query object or None
+
+        """
+        try:
+            response = self.service.queries().get(queryId=query_id).execute()
+            return response
+        except Exception:
+            return None
+        pass

@@ -2431,14 +2431,22 @@
       "type": "object",
       "propertyOrder": 600,
       "required": [
-        "primary_key",
-        "load_type"
+        "table_name",
+        "primary_keys",
+        "incremental_loading"
       ],
       "properties": {
+        "table_name": {
+          "type": "string",
+          "title": "Output Table Name",
+          "propertyOrder": 10,
+          "minLength": 1,
+          "description": "The name must be a valid file name (e.g. report_row_1.csv)."
+        },
         "primary_keys": {
           "type": "array",
           "title": "Primary Keys",
-          "propertyOrder": 10,
+          "propertyOrder": 20,
           "format": "select",
           "uniqueItems": true,
           "items": {
@@ -2449,24 +2457,22 @@
             "enumSource": "dim"
           }
         },
-        "load_type": {
-          "type": "string",
-          "title": "Load Type",
-          "propertyOrder": 20,
-          "enum": [
-            "full_load",
-            "incremental_load"
-          ],
-          "options": {
-            "enum_titles": [
-              "Full Load",
-              "Incremental Load"
-            ]
-          },
-          "default": "incremental_load",
-          "description": "If Full load is used, the destination table will be overwritten every run. If Incremental load is used, data will be upserted into the destination table."
+        "incremental_loading": {
+          "type": "boolean",
+          "title": "Incremental Loading",
+          "format": "checkbox",
+          "propertyOrder": 30,
+          "default": true,
+          "description": "Whether incremental loading should be used."
         }
       }
+    },
+    "debug": {
+      "propertyOrder": 700,
+      "title": "Debug",
+      "type": "boolean",
+      "description": "When checked, logging will be more verbose",
+      "format": "checkbox"
     }
   }
 }
