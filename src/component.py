@@ -2,18 +2,19 @@
 Template Component main class.
 
 """
-import logging
 # from typing import List, Tuple
 import json
-import dataconf
+import logging
 
+import dataconf
 # from google_auth_oauthlib.flow import Flow
 # from googleapiclient import discovery
 import requests
 from keboola.component.base import ComponentBase
 from keboola.component.exceptions import UserException
-from google_dv360 import GoogleDV360Client, translate_filters
+
 from configuration import Configuration
+from google_dv360 import GoogleDV360Client, translate_filters
 
 
 class Component(ComponentBase):
@@ -62,7 +63,7 @@ class Component(ComponentBase):
 
         """
         pks = translate_filters(self.cfg.destination.primary_keys)
-        result_table = self.create_out_table_definition(self.cfg.destination.table_name,
+        result_table = self.create_out_table_definition(f"{self.cfg.destination.table_name}.csv",
                                                         primary_key=pks,
                                                         incremental=self.cfg.destination.incremental_loading)
         self.write_manifest(result_table)
@@ -109,7 +110,7 @@ class Component(ComponentBase):
         import os
         configrow_id = os.getenv('KBC_CONFIGROWID', 'xxxxxx')
         return 'generated_' + self.environment_variables.project_id + '_' + \
-               self.environment_variables.config_id + '_' +\
+               self.environment_variables.config_id + '_' + \
                configrow_id
 
     def run(self):

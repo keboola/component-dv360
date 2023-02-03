@@ -3,7 +3,8 @@
   "type": "object",
   "required": [
     "input_variant",
-    "time_range"
+    "time_range",
+    "destination"
   ],
   "properties": {
     "input_variant": {
@@ -55,7 +56,7 @@
           ],
           "options": {
             "enum_titles": [
-              "Custom range specified by customStartDate and customEndDate fields",
+              "Custom date range",
               "Current day",
               "Previous day",
               "All days, including the current day, since the most recent Sunday",
@@ -2438,10 +2439,10 @@
       "properties": {
         "table_name": {
           "type": "string",
-          "title": "Output Table Name",
+          "title": "Result Table Name",
           "propertyOrder": 10,
           "minLength": 1,
-          "description": "The name must be a valid file name (e.g. report_row_1.csv)."
+          "description": "Name the destination table for this report. (e.g. standard_performance_data)."
         },
         "primary_keys": {
           "type": "array",
@@ -2471,6 +2472,7 @@
       "propertyOrder": 700,
       "title": "Debug",
       "type": "boolean",
+      "hidden": true,
       "description": "When checked, logging will be more verbose",
       "format": "checkbox"
     }
