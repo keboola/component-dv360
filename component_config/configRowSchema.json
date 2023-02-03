@@ -2433,20 +2433,21 @@
       "propertyOrder": 600,
       "required": [
         "table_name",
-        "primary_keys",
+        "primary_key",
         "incremental_loading"
       ],
       "properties": {
         "table_name": {
           "type": "string",
-          "title": "Result Table Name",
+          "title": "Storage Table Name",
           "propertyOrder": 10,
           "minLength": 1,
-          "description": "Name the destination table for this report. (e.g. standard_performance_data)."
+          "description": "Name of the destination table for this report. (e.g. standard_performance_data)."
         },
-        "primary_keys": {
+        "primary_key": {
           "type": "array",
-          "title": "Primary Keys",
+          "title": "Primary Key",
+          "description": "List of columns (from selected dimensions) to be used as primary key of the resulting table. We recommend using ID columns where possible, to avoid ambiguity in case the dimension name is changed.",
           "propertyOrder": 20,
           "format": "select",
           "uniqueItems": true,
@@ -2459,12 +2460,21 @@
           }
         },
         "incremental_loading": {
+          "enum": [
+            false,
+            true
+          ],
           "type": "boolean",
-          "title": "Incremental Loading",
-          "format": "checkbox",
-          "propertyOrder": 30,
+          "title": "Load Type",
           "default": true,
-          "description": "Whether incremental loading should be used."
+          "options": {
+            "enum_titles": [
+              "Full Load",
+              "Incremental Load"
+            ]
+          },
+          "description": "If Full load is used, the destination table will be overwritten every run. If Incremental Load is used, data will be upserted into the destination table.",
+          "propertyOrder": 30
         }
       }
     },

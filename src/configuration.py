@@ -21,7 +21,7 @@ class FilterPair:
 class Destination:
     table_name: str
     incremental_loading: bool = True
-    primary_keys: list[str] = None
+    primary_key: list[str] = None
 
 
 @dataclass
@@ -89,7 +89,7 @@ if __name__ == '__main__':
       "destination": {
         "table_name": "report_row_1.csv",
         "incremental_loading": true,
-        "primary_keys": [
+        "primary_key": [
           "FILTER_ADVERTISER",
           "FILTER_BROWSER"
         ]
@@ -124,7 +124,7 @@ if __name__ == '__main__':
       "destination": {
         "table_name": "report_row_1.csv",
         "incremental_loading": true,
-        "primary_keys": [
+        "primary_key": [
           "FILTER_ADVERTISER",
           "FILTER_BROWSER"
         ]
@@ -148,7 +148,7 @@ if __name__ == '__main__':
         },
         "destination": {
             "table_name": "report_row_1.csv",
-            "primary_keys": [
+            "primary_key": [
                 "FILTER_ADVERTISER",
                 "FILTER_BROWSER"
             ],

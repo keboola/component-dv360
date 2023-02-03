@@ -62,7 +62,7 @@ class Component(ComponentBase):
         Returns:
 
         """
-        pks = translate_filters(self.cfg.destination.primary_keys)
+        pks = translate_filters(self.cfg.destination.primary_key)
         result_table = self.create_out_table_definition(f"{self.cfg.destination.table_name}.csv",
                                                         primary_key=pks,
                                                         incremental=self.cfg.destination.incremental_loading)
