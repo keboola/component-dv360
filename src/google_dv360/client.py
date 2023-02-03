@@ -1,11 +1,11 @@
 import logging
 import time
-from typing import List, Tuple
-import dateparser
 
+import dateparser
 from google_auth_oauthlib.flow import Flow
 from googleapiclient import discovery
 from keboola.component.exceptions import UserException
+from typing import List, Tuple
 
 
 class GoogleDV360ClientException(UserException):
@@ -134,9 +134,10 @@ class GoogleDV360Client:
         while True:  # TODO: consider some timeout - currently we terminate on 'DONE' or abort on error
             response = m.execute()
             state = response['metadata']['status']['state']
-            logging.info(f"Report state : {state}")
+            logging.info(f"Checking report state : {state}")
             if state == 'DONE':
                 return response
+                # TODO: Remove
                 # url = response['metadata']['googleCloudStoragePath']
                 # # TODO: employ streaming get
                 # resp_report = requests.get(url)
@@ -167,5 +168,6 @@ class GoogleDV360Client:
             response = self.service.queries().get(queryId=query_id).execute()
             return response
         except Exception:
+            # TODO: remove
             return None
         pass

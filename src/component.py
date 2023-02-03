@@ -142,7 +142,7 @@ class Component(ComponentBase):
             else:
                 report_id = self.cfg.entry_id
 
-        print(f'Query created: {report_id}')
+        logging.info(f'Query created: {report_id}')
 
         report_run_id = client.run_report(report_id,
                                           self.cfg.time_range.period,
@@ -158,11 +158,6 @@ class Component(ComponentBase):
         self.write_report(contents_url)
 
         self.save_state(report_response)
-
-        queries = client.list_queries()
-        print("Existing queries:")
-        for (q_id, q_title) in queries:
-            print(f'{q_id}: {q_title}')
 
 
 """
