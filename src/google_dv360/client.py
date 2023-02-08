@@ -109,7 +109,12 @@ class GoogleDV360Client:
             }
         }
         m = self.service.queries().create(body=body)
-        response = m.execute()
+        try:
+            response = m.execute()
+        except Exception as ex:
+            if hasattr(ex, 'reason'):
+                raise UserException(ex.reason)
+            raise ex
         report_id = response['queryId']
         return report_id
 
@@ -137,21 +142,23 @@ class GoogleDV360Client:
             logging.info(f"Checking report state : {state}")
             if state == 'DONE':
                 return response
-                # TODO: Remove
-                # url = response['metadata']['googleCloudStoragePath']
-                # # TODO: employ streaming get
-                # resp_report = requests.get(url)
-                # return resp_report.text
             if state == 'FAILED':
                 raise GoogleDV360ClientException(f'report failed: {response["metadata"]}')
             time.sleep(30)
 
     def list_queries(self) -> list[(str, str)]:
-        response = self.service.queries().list(pageSize='100').execute()
-        if 'queries' in response:
-            return [(query['queryId'], query['metadata']['title']) for query in response['queries']]
-        else:
-            return []
+        page_token = None
+        query_list = []
+        while True:
+            response = self.service.queries().list(pageSize=100, orderBy='queryId desc', pageToken=page_token).execute()
+            if 'queries' in response:
+                query_list.extend([(query['queryId'], query['metadata']['title']) for query in response['queries']])
+                page_token = response.get('nextPageToken')
+                if not page_token:
+                    break
+            else:
+                break
+        return query_list
 
     def get_query(self, query_id: str) -> object | None:
         """ Search for specific query
@@ -168,6 +175,11 @@ class GoogleDV360Client:
             response = self.service.queries().get(queryId=query_id).execute()
             return response
         except Exception:
-            # TODO: remove
             return None
         pass
+
+    def delete_query(self, query_id: str):
+        try:
+            self.service.queries().delete(queryId=query_id).execute()
+        except Exception:
+            pass

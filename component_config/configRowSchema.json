@@ -2421,9 +2421,14 @@
       "propertyOrder": 400,
       "minLength": 1,
       "description": "Enter report ID as presented in DV360 Report Builder",
+      "enum": [],
       "options": {
         "dependencies": {
           "input_variant": "entry_id"
+        },
+        "async": {
+          "label": "Load available reports",
+          "action": "list_queries"
         }
       }
     },
@@ -2437,6 +2442,17 @@
         "incremental_loading"
       ],
       "properties": {
+        "selected_variant": {
+          "type": "string",
+          "description": "Helper dummy element to render pkeys",
+          "template": "{{var}}",
+          "watch": {
+            "var": "input_variant"
+          },
+          "options": {
+            "hidden": true
+          }
+        },
         "table_name": {
           "type": "string",
           "title": "Storage Table Name",
@@ -2457,6 +2473,34 @@
               "dim": "report_settings.dimensions"
             },
             "enumSource": "dim"
+          },
+          "options": {
+            "dependencies": {
+              "selected_variant": "report_settings"
+            }
+          }
+        },
+        "primary_key_existing": {
+          "type": "array",
+          "title": "Primary Key",
+          "description": "List of columns (load from report) to be used as primary key of the resulting table. We recommend using ID columns where possible, to avoid ambiguity in case the dimension name is changed.",
+          "propertyOrder": 21,
+          "format": "select",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [],
+            "minLength": 1,
+            "title": "Dimension"
+          },
+          "options": {
+            "async": {
+              "label": "Load available dimensions",
+              "action": "list_report_dimensions"
+            },
+            "dependencies": {
+              "selected_variant": "entry_id"
+            }
           }
         },
         "incremental_loading": {

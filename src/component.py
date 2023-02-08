@@ -7,14 +7,12 @@ import json
 import logging
 
 import dataconf
-# from google_auth_oauthlib.flow import Flow
-# from googleapiclient import discovery
 import requests
-from keboola.component.base import ComponentBase
+from keboola.component.base import ComponentBase, sync_action
 from keboola.component.exceptions import UserException
 
 from configuration import Configuration
-from google_dv360 import GoogleDV360Client, translate_filters
+from google_dv360 import GoogleDV360Client, translate_filters, get_filter_table
 
 
 class Component(ComponentBase):
@@ -109,22 +107,56 @@ class Component(ComponentBase):
         # TODO: Currently keboola has an inssue: It does not pass row-id in variables, we use a workaround:
         import os
         configrow_id = os.getenv('KBC_CONFIGROWID', 'xxxxxx')
-        return 'generated_' + self.environment_variables.project_id + '_' + \
+        return 'keboola_generated_' + self.environment_variables.project_id + '_' + \
                self.environment_variables.config_id + '_' + \
                configrow_id
+
+    @sync_action('list_queries')
+    def list_queries(self):
+        client = GoogleDV360Client(self.configuration.oauth_credentials)
+        queries = client.list_queries()
+        # wish was to include query creation date but tha info is not available in the service
+        resp = [dict(value=q[0], label=f'{q[0]} - {q[1]}') for q in queries]
+        return resp
+
+    @sync_action('list_report_dimensions')
+    def list_report_dimensions(self):
+        entry_id = self.configuration.parameters.get('entry_id')
+        if not entry_id:
+            raise UserException('No report ID provided')
+        client = GoogleDV360Client(self.configuration.oauth_credentials)
+        query = client.get_query(query_id=entry_id)
+        if not query:
+            raise UserException(f'Report id = {entry_id} was not found')
+        table = get_filter_table()
+        resp = [dict(value=f, label=table.get(f)) for f in query["params"]["groupBys"]]
+        return resp
+
+    @sync_action('validate_query')
+    def validate_query(self):
+        report_settings = self.configuration.parameters.get('report_settings')
+        if not report_settings:
+            raise UserException('No report settings in configuration parameters')
+        report_type = report_settings.get('report_type')
+        dimensions = report_settings.get('dimensions')
+        metrics = report_settings.get('metrics')
+        filters = report_settings.get('filters')
+        filters = [(filter_pair.get('name'), filter_pair.get('value')) for filter_pair in filters]
+
+        client = GoogleDV360Client(self.configuration.oauth_credentials)
+
+        report_id = client.create_report('just_dummy_2_delete', report_type, dimensions, metrics, filters)
+
+        client.delete_query(report_id)
 
     def run(self):
         """
         BDM example auth
         """
-
-        logging.debug(self.environment_variables)
+        # TODO: validate parameters
 
         logging.debug(self.configuration.parameters)
-
-        # TODO: validate parameters
         self.cfg = Configuration.fromDict(self.configuration.parameters)
-
         logging.debug(self.cfg)
 
         client = GoogleDV360Client(self.configuration.oauth_credentials)
