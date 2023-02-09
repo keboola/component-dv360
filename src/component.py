@@ -123,7 +123,7 @@ class Component(ComponentBase):
     def list_report_dimensions(self):
         entry_id = self.configuration.parameters.get('entry_id')
         if not entry_id:
-            raise UserException(f'No report ID provided {self.configuration.parameters}')
+            raise UserException(f'No report ID provided. full config: {list(self.configuration.config_data.keys())}')
         client = GoogleDV360Client(self.configuration.oauth_credentials)
         query = client.get_query(query_id=entry_id)
         if not query:
