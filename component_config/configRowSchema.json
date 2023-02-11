@@ -2421,9 +2421,14 @@
       "propertyOrder": 400,
       "minLength": 1,
       "description": "Enter report ID as presented in DV360 Report Builder",
-     "options": {
+      "enum": [],
+      "options": {
         "dependencies": {
           "input_variant": "entry_id"
+        },
+        "async": {
+          "label": "Load available reports",
+          "action": "list_queries"
         }
       }
     },
