@@ -22,6 +22,7 @@ class Destination:
     table_name: str
     incremental_loading: bool = True
     primary_key: list[str] = None
+    primary_key_existing: list[str] = None
 
 
 @dataclass

@@ -56,7 +56,7 @@ class Component(ComponentBase):
             else:
                 report_id = self.cfg.existing_report_id
 
-        logging.info(f'Query created: {report_id}')
+        logging.info(f'Query used: {report_id}')
 
         report_run_id = client.run_report(report_id,
                                           self.cfg.time_range.period,
@@ -92,8 +92,6 @@ class Component(ComponentBase):
                     break
                 dst.write(line)
 
-            pass
-
     def write_report(self, contents_url: str):
         """
 
@@ -103,7 +101,9 @@ class Component(ComponentBase):
         Returns:
 
         """
-        pks = translate_filters(self.cfg.destination.primary_key)
+        pks_raw = self.cfg.destination.primary_key_existing if self.cfg.input_variant == 'existing_report_id' else \
+            self.cfg.destination.primary_key
+        pks = translate_filters(pks_raw)
         result_table = self.create_out_table_definition(f"{self.cfg.destination.table_name}.csv",
                                                         primary_key=pks,
                                                         incremental=self.cfg.destination.incremental_loading)
