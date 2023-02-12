@@ -13,8 +13,8 @@
       "propertyOrder": 100,
       "description": "You may choose to either define a new report or to enter existing report ID",
       "enum": [
-        "report_settings",
-        "entry_id"
+        "report_specification",
+        "existing_report_id"
       ],
       "options": {
         "enum_titles": [
@@ -22,7 +22,7 @@
           "Existing report ID"
         ]
       },
-      "default": "report_settings"
+      "default": "report_specification"
     },
     "time_range": {
       "type": "object",
@@ -101,7 +101,7 @@
         }
       }
     },
-    "report_settings": {
+    "report_specification": {
       "type": "object",
       "title": "Report Details",
       "propertyOrder": 300,
@@ -140,7 +140,7 @@
           "propertyOrder": 500
         },
         "dimensions": {
-          "title": "Filters (aka dimensions)",
+          "title": "Dimensions",
           "type": "array",
           "format": "select",
           "uniqueItems": true,
@@ -2411,11 +2411,11 @@
       },
       "options": {
         "dependencies": {
-          "input_variant": "report_settings"
+          "input_variant": "report_specification"
         }
       }
     },
-    "entry_id": {
+    "existing_report_id": {
       "type": "string",
       "title": "Report ID",
       "propertyOrder": 400,
@@ -2424,7 +2424,7 @@
       "enum": [],
       "options": {
         "dependencies": {
-          "input_variant": "entry_id"
+          "input_variant": "existing_report_id"
         },
         "async": {
           "label": "Load available reports",
@@ -2470,13 +2470,13 @@
           "items": {
             "type": "string",
             "watch": {
-              "dim": "report_settings.dimensions"
+              "dim": "report_specification.dimensions"
             },
             "enumSource": "dim"
           },
           "options": {
             "dependencies": {
-              "selected_variant": "report_settings"
+              "selected_variant": "report_specification"
             }
           }
         },
@@ -2499,7 +2499,7 @@
               "action": "list_report_dimensions"
             },
             "dependencies": {
-              "selected_variant": "entry_id"
+              "selected_variant": "existing_report_id"
             }
           }
         },

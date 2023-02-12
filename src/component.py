@@ -30,6 +30,49 @@ class Component(ComponentBase):
         super().__init__()
         self.cfg = None
 
+    def run(self):
+        """
+        BDM example auth
+        """
+        # TODO: validate parameters
+
+        logging.debug(self.configuration.parameters)
+        self.cfg = Configuration.fromDict(self.configuration.parameters)
+        logging.debug(self.cfg)
+
+        client = GoogleDV360Client(self.configuration.oauth_credentials)
+
+        report_id = self.get_existing_report_id(client)
+
+        if not report_id:
+            if self.cfg.input_variant == 'report_specification':
+                filters = [(filter_pair.name, filter_pair.value) for filter_pair in
+                           self.cfg.report_specification.filters]
+                report_id = client.create_report(self.generate_query_name(),
+                                                 self.cfg.report_specification.report_type,
+                                                 self.cfg.report_specification.dimensions,
+                                                 self.cfg.report_specification.metrics,
+                                                 filters)
+            else:
+                report_id = self.cfg.existing_report_id
+
+        logging.info(f'Query created: {report_id}')
+
+        report_run_id = client.run_report(report_id,
+                                          self.cfg.time_range.period,
+                                          date_from=self.cfg.time_range.date_from,
+                                          date_to=self.cfg.time_range.date_to)
+
+        # Response structure is documented here:
+        # https://developers.google.com/bid-manager/reference/rest/v2/queries.reports#Report
+        report_response = client.wait_report(report_id, report_run_id)
+
+        contents_url = report_response['metadata']['googleCloudStoragePath']
+
+        self.write_report(contents_url)
+
+        self.save_state(report_response)
+
     @staticmethod
     def download_file(url: str, result_file_path: str):
         # avoid loading all into memory
@@ -100,7 +143,7 @@ class Component(ComponentBase):
             # check for query existence
             q = client.get_query(prev_report_id)
             return prev_report_id if q else None
-        # TODO: think over: delete orphan report_id - check input_variant was not entry_id case
+        # TODO: think over: delete orphan report_id - check input_variant was not existing_report_id case
         return None
 
     def generate_query_name(self):
@@ -121,26 +164,26 @@ class Component(ComponentBase):
 
     @sync_action('list_report_dimensions')
     def list_report_dimensions(self):
-        entry_id = self.configuration.parameters.get('entry_id')
-        if not entry_id:
+        existing_report_id = self.configuration.parameters.get('existing_report_id')
+        if not existing_report_id:
             raise UserException('No report ID provided.')
         client = GoogleDV360Client(self.configuration.oauth_credentials)
-        query = client.get_query(query_id=entry_id)
+        query = client.get_query(query_id=existing_report_id)
         if not query:
-            raise UserException(f'Report id = {entry_id} was not found')
+            raise UserException(f'Report id = {existing_report_id} was not found')
         table = get_filter_table()
         resp = [dict(value=f, label=table.get(f)) for f in query["params"]["groupBys"]]
         return resp
 
     @sync_action('validate_query')
     def validate_query(self):
-        report_settings = self.configuration.parameters.get('report_settings')
-        if not report_settings:
-            raise UserException('No report settings in configuration parameters')
-        report_type = report_settings.get('report_type')
-        dimensions = report_settings.get('dimensions')
-        metrics = report_settings.get('metrics')
-        filters = report_settings.get('filters')
+        report_specification = self.configuration.parameters.get('report_specification')
+        if not report_specification:
+            raise UserException('No report specification in configuration parameters')
+        report_type = report_specification.get('report_type')
+        dimensions = report_specification.get('dimensions')
+        metrics = report_specification.get('metrics')
+        filters = report_specification.get('filters')
         filters = [(filter_pair.get('name'), filter_pair.get('value')) for filter_pair in filters]
 
         client = GoogleDV360Client(self.configuration.oauth_credentials)
@@ -148,48 +191,6 @@ class Component(ComponentBase):
         report_id = client.create_report('just_dummy_2_delete', report_type, dimensions, metrics, filters)
 
         client.delete_query(report_id)
-
-    def run(self):
-        """
-        BDM example auth
-        """
-        # TODO: validate parameters
-
-        logging.debug(self.configuration.parameters)
-        self.cfg = Configuration.fromDict(self.configuration.parameters)
-        logging.debug(self.cfg)
-
-        client = GoogleDV360Client(self.configuration.oauth_credentials)
-
-        report_id = self.get_existing_report_id(client)
-
-        if not report_id:
-            if self.cfg.input_variant == 'report_settings':
-                filters = [(filter_pair.name, filter_pair.value) for filter_pair in self.cfg.report_settings.filters]
-                report_id = client.create_report(self.generate_query_name(),
-                                                 self.cfg.report_settings.report_type,
-                                                 self.cfg.report_settings.dimensions,
-                                                 self.cfg.report_settings.metrics,
-                                                 filters)
-            else:
-                report_id = self.cfg.entry_id
-
-        logging.info(f'Query created: {report_id}')
-
-        report_run_id = client.run_report(report_id,
-                                          self.cfg.time_range.period,
-                                          date_from=self.cfg.time_range.date_from,
-                                          date_to=self.cfg.time_range.date_to)
-
-        # Response structure is documented here:
-        # https://developers.google.com/bid-manager/reference/rest/v2/queries.reports#Report
-        report_response = client.wait_report(report_id, report_run_id)
-
-        contents_url = report_response['metadata']['googleCloudStoragePath']
-
-        self.write_report(contents_url)
-
-        self.save_state(report_response)
 
 
 """

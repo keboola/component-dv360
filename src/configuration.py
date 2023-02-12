@@ -52,28 +52,28 @@ class Configuration(ConfigurationBase):
     input_variant: str
     destination: Destination
     time_range: TimeRange
-    report_settings: ReportSettings = field(default_factory=lambda: ConfigTree({}))
-    entry_id: str = ""
+    report_specification: ReportSettings = field(default_factory=lambda: ConfigTree({}))
+    existing_report_id: str = ""
     debug: bool = False
 
     def __eq__(self, other):
-        if self.input_variant == "entry_id":
-            return self.entry_id == other.entry_id
+        if self.input_variant == "existing_report_id":
+            return self.existing_report_id == other.existing_report_id
         else:
-            return self.report_settings == other.report_settings
+            return self.report_specification == other.report_specification
 
 
 if __name__ == '__main__':
     json_conf_1 = """
     {
-      "input_variant": "report_settings",
-      "entry_id": ""
+      "input_variant": "report_specification",
+      "existing_report_id": ""
       "time_range": {
         "period": "LAST_90_DAYS"
         "date_from": "yesterday"
         "date_to": "dneska"
       },
-      "report_settings": {
+      "report_specification": {
         "report_type": "STANDARD",
         "dimensions": [
           "FILTER_ADVERTISER",
@@ -101,14 +101,14 @@ if __name__ == '__main__':
 
     json_conf_2 = """
     {
-      "input_variant": "report_settings",
-      "entry_id": ""
+      "input_variant": "report_specification",
+      "existing_report_id": ""
       "time_range": {
         "period": "LAST_90_DAYS"
         "date_from": "yesterday"
         "date_to": "dneska"
       },
-      "report_settings": {
+      "report_specification": {
         "report_type": "STANDARD",
         "dimensions": [
           "FILTER_ADVERTISER",
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     # print(f'Equality cf1 == cf2 {cf1 == cf2}')
 
     pars = {
-        "input_variant": "report_settings",
+        "input_variant": "report_specification",
         "time_range": {
             "period": "LAST_90_DAYS",
             "date_from": "yesterday",
