@@ -4,12 +4,6 @@ import dataconf
 
 from pyhocon.config_tree import ConfigTree
 
-from keboola.component.exceptions import UserException
-
-
-class ConfigurationException(UserException):
-    pass
-
 
 @dataclass
 class FilterPair:

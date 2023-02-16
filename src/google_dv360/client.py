@@ -45,6 +45,10 @@ def get_date_period_converted(period_from: str, period_to: str) -> Tuple[dict, d
 
 
 class GoogleDV360Client:
+    """
+    Instance of this class provides a service object that is responsible for all communication
+    to DV360 service.
+    """
     def __init__(self, oauth_credentials):
         self.service = None
         token_response = oauth_credentials.data
@@ -87,7 +91,7 @@ class GoogleDV360Client:
             metrics: Selection dv360 metrics to include
             filters: List of filter pairs to limit source data
 
-        Returns:
+        Returns: ID of created report (internally called query)
 
         """
         body = {
@@ -119,6 +123,17 @@ class GoogleDV360Client:
         return report_id
 
     def run_report(self, report_id: str, data_range: str, date_from=None, date_to=None):
+        """ Run a specific query within specified date range.
+
+        Args:
+            report_id: existing query id (corresponds to report ID from dv360 console)
+            data_range: one of predefined ranges or a custom range
+            date_from: starting date specification for custom data range
+            date_to: ending date specification for custom data range
+
+        Returns: ID of started report run
+
+        """
         body = {
             "dataRange": {
                 "range": data_range
@@ -135,6 +150,17 @@ class GoogleDV360Client:
         return run_id
 
     def wait_report(self, report_id: str, run_id: str) -> dict:
+        """ Method keeps querying state of
+
+        Args:
+            report_id:
+            run_id:
+
+        Returns: A report object
+
+        Raises:
+
+        """
         m = self.service.queries().reports().get(queryId=report_id, reportId=run_id)
         while True:  # TODO: consider some timeout - currently we terminate on 'DONE' or abort on error
             response = m.execute()
@@ -143,10 +169,16 @@ class GoogleDV360Client:
             if state == 'DONE':
                 return response
             if state == 'FAILED':
-                raise GoogleDV360ClientException(f'report failed: {response["metadata"]}')
+                report_type = response['params']['type']
+                raise GoogleDV360ClientException(f'report ({report_type}) failed: {response["metadata"]}')
             time.sleep(30)
 
     def list_queries(self) -> list[(str, str)]:
+        """ List all queries associated with authorized user.
+
+        Returns: list of tuples - (query id, query name)
+
+        """
         page_token = None
         query_list = []
         while True:

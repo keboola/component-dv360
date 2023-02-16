@@ -32,9 +32,8 @@ class Component(ComponentBase):
 
     def run(self):
         """
-        BDM example auth
+        Main component method.
         """
-        # TODO: validate parameters
 
         logging.debug(self.configuration.parameters)
         self.cfg = Configuration.fromDict(self.configuration.parameters)
@@ -75,7 +74,6 @@ class Component(ComponentBase):
 
     @staticmethod
     def download_file(url: str, result_file_path: str):
-        # avoid loading all into memory
         res = requests.get(url, stream=True, timeout=180)
         res.raise_for_status()
 
@@ -98,7 +96,7 @@ class Component(ComponentBase):
         Args:
             contents_url: URL where Google stored report contents
 
-        Returns:
+        Returns: no value returned
 
         """
         pks_raw = self.cfg.destination.primary_key_existing if self.cfg.input_variant == 'existing_report_id' else \
@@ -143,11 +141,10 @@ class Component(ComponentBase):
             # check for query existence
             q = client.get_query(prev_report_id)
             return prev_report_id if q else None
-        # TODO: think over: delete orphan report_id - check input_variant was not existing_report_id case
         return None
 
     def generate_query_name(self):
-        # TODO: Currently keboola has an inssue: It does not pass row-id in variables, we use a workaround:
+        # TODO: Currently Keboola has an issue: It does not pass row-id in variables, we use a workaround:
         import os
         configrow_id = os.getenv('KBC_CONFIGROWID', 'xxxxxx')
         return 'keboola_generated_' + self.environment_variables.project_id + '_' + \
@@ -156,6 +153,10 @@ class Component(ComponentBase):
 
     @sync_action('list_queries')
     def list_queries(self):
+        """ A sync action used by Keboola GUI to provide available report (query) IDs for Report ID field.
+
+        Returns: List of dictionaries having value and label attributes.
+        """
         client = GoogleDV360Client(self.configuration.oauth_credentials)
         queries = client.list_queries()
         # wish was to include query creation date but tha info is not available in the service
@@ -164,6 +165,10 @@ class Component(ComponentBase):
 
     @sync_action('list_report_dimensions')
     def list_report_dimensions(self):
+        """ A sync action used by Keboola GUI to provide available dimensions for existing report (query)
+
+        Returns: List of dictionaries having value and label attributes.
+        """
         existing_report_id = self.configuration.parameters.get('existing_report_id')
         if not existing_report_id:
             raise UserException('No report ID provided.')
@@ -177,6 +182,16 @@ class Component(ComponentBase):
 
     @sync_action('validate_query')
     def validate_query(self):
+        """ A sync action used by Keboola GUI to check validity of entered data.
+        Method uses GUI data and tries to create a query calling the service.
+        If service succeeds report specification is considered valid.
+        Created query is immediately deleted as it need not be the final specification.
+
+        Returns: no return
+
+        Raises: Exception when create query failed
+
+        """
         report_specification = self.configuration.parameters.get('report_specification')
         if not report_specification:
             raise UserException('No report specification in configuration parameters')
