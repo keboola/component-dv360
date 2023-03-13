@@ -39,7 +39,7 @@ class Component(ComponentBase):
         self.cfg = Configuration.fromDict(self.configuration.parameters)
         logging.debug(self.cfg)
 
-        client = GoogleDV360Client(self.configuration.oauth_credentials)
+        client = self._get_google_client()
 
         report_id = self.get_existing_report_id(client)
 
@@ -71,6 +71,14 @@ class Component(ComponentBase):
         self.write_report(contents_url)
 
         self.save_state(report_response)
+
+    def _get_google_client(self):
+        client = GoogleDV360Client(
+            self.configuration.oauth_credentials.appKey,
+            self.configuration.oauth_credentials.appSecret,
+            self.configuration.oauth_credentials.data
+        )
+        return client
 
     @staticmethod
     def download_file(url: str, result_file_path: str):
@@ -157,7 +165,7 @@ class Component(ComponentBase):
 
         Returns: List of dictionaries having value and label attributes.
         """
-        client = GoogleDV360Client(self.configuration.oauth_credentials)
+        client = self._get_google_client()
         queries = client.list_queries()
         # wish was to include query creation date but tha info is not available in the service
         resp = [dict(value=q[0], label=f'{q[0]} - {q[1]}') for q in queries]
@@ -172,7 +180,7 @@ class Component(ComponentBase):
         existing_report_id = self.configuration.parameters.get('existing_report_id')
         if not existing_report_id:
             raise UserException('No report ID provided.')
-        client = GoogleDV360Client(self.configuration.oauth_credentials)
+        client = self._get_google_client()
         query = client.get_query(query_id=existing_report_id)
         if not query:
             raise UserException(f'Report id = {existing_report_id} was not found')
@@ -201,7 +209,7 @@ class Component(ComponentBase):
         filters = report_specification.get('filters')
         filters = [(filter_pair.get('name'), filter_pair.get('value')) for filter_pair in filters]
 
-        client = GoogleDV360Client(self.configuration.oauth_credentials)
+        client = self._get_google_client()
 
         report_id = client.create_report('just_dummy_2_delete', report_type, dimensions, metrics, filters)
 
