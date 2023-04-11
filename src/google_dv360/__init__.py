@@ -304,7 +304,7 @@ _filter_table = {
 
 
 def translate_filters(filter_constants: list[str]) -> list[str]:
-    return [_filter_table.get(item).replace(' ', '_') for item in filter_constants]
+    return [_filter_table.get(item) for item in filter_constants]
 
 
 def get_filter_table() -> dict:
