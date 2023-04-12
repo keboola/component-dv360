@@ -10,7 +10,6 @@ import dataconf
 import requests
 from keboola.component.base import ComponentBase, sync_action
 from keboola.component.exceptions import UserException
-from keboola.utils.header_normalizer import DefaultHeaderNormalizer
 
 from configuration import Configuration
 from google_dv360 import GoogleDV360Client, translate_filters, get_filter_table
@@ -108,10 +107,9 @@ class Component(ComponentBase):
         Returns: no value returned
 
         """
-        pks_raw = self.cfg.destination.primary_key_existing if self.cfg.input_variant == 'existing_report_id' else \
+        pk_keys = self.cfg.destination.primary_key_existing if self.cfg.input_variant == 'existing_report_id' else \
             self.cfg.destination.primary_key
-        header_normalizer = DefaultHeaderNormalizer()
-        pks = header_normalizer.normalize_header(translate_filters(pks_raw))
+        pks = translate_filters(pk_keys)
         result_table = self.create_out_table_definition(f"{self.cfg.destination.table_name}.csv",
                                                         primary_key=pks,
                                                         incremental=self.cfg.destination.incremental_loading)
