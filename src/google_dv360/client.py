@@ -1,11 +1,12 @@
 import logging
 import time
+from typing import List, Tuple
 
 import dateparser
 from google_auth_oauthlib.flow import Flow
 from googleapiclient import discovery
+from googleapiclient.errors import HttpError
 from keboola.component.exceptions import UserException
-from typing import List, Tuple
 
 
 class GoogleDV360ClientException(UserException):
@@ -49,6 +50,7 @@ class GoogleDV360Client:
     Instance of this class provides a service object that is responsible for all communication
     to DV360 service.
     """
+
     def __init__(self, client_id: str, app_secret: str, token_data: dict):
         # oauth_credentials.appSecret .. app_secret,
         # oauth_credentials.appKey .. client_id a
@@ -145,12 +147,17 @@ class GoogleDV360Client:
         if data_range == 'CUSTOM_DATES':
             body["dataRange"]["customStartDate"], body["dataRange"]["customEndDate"] = get_date_period_converted(
                 date_from, date_to)
-
-        m = self.service.queries().run(body=body, queryId=report_id)
-        response = m.execute()
-        run_id = response['key']['reportId']
-        logging.info(f"Running query : {report_id}:{run_id}")
-        return run_id
+        try:
+            m = self.service.queries().run(body=body, queryId=report_id)
+            response = m.execute()
+            run_id = response['key']['reportId']
+            logging.info(f"Running query : {report_id}:{run_id}")
+            return run_id
+        except HttpError as e:
+            if 400 <= e.status_code < 500:
+                raise GoogleDV360ClientException(e.reason) from e
+            else:
+                raise e
 
     def wait_report(self, report_id: str, run_id: str) -> dict:
         """ Method keeps querying state of
