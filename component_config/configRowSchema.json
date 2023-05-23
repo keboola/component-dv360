@@ -144,6 +144,8 @@
           "type": "array",
           "format": "select",
           "uniqueItems": true,
+          "required": true,
+          "minItems": 1,
           "items": {
             "type": "string",
             "enum": [
@@ -756,6 +758,8 @@
           "title": "Metrics",
           "propertyOrder": 700,
           "format": "select",
+          "required": true,
+          "minItems": 1,
           "uniqueItems": true,
           "items": {
             "type": "string",

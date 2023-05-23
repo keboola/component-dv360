@@ -13,7 +13,7 @@ from keboola.component.exceptions import UserException
 from keboola.utils.header_normalizer import DefaultHeaderNormalizer
 
 from configuration import Configuration
-from google_dv360 import GoogleDV360Client, translate_filters, get_filter_table
+from google_dv360 import GoogleDV360Client, translate_filters, get_filter_table, GoogleDV360ClientException
 
 
 class Component(ComponentBase):
@@ -29,7 +29,7 @@ class Component(ComponentBase):
 
     def __init__(self):
         super().__init__()
-        self.cfg = None
+        self.cfg: Configuration = None
 
     def run(self):
         """
@@ -38,7 +38,8 @@ class Component(ComponentBase):
 
         logging.debug(self.configuration.parameters)
         self.cfg = Configuration.fromDict(self.configuration.parameters)
-        logging.debug(self.cfg)
+
+        self._validate_configuration()
 
         client = self._get_google_client()
 
@@ -217,6 +218,17 @@ class Component(ComponentBase):
 
         client.delete_query(report_id)
 
+    def _validate_configuration(self):
+        errors = []
+        if self.cfg.input_variant == 'report_specification':
+            if not self.cfg.report_specification.metrics:
+                errors.append("At least one metric needs to be specified!")
+            if not self.cfg.report_specification.dimensions:
+                errors.append("At least one dimension needs to be specified!")
+        if errors:
+            err_string = '\n'.join(errors)
+            raise UserException(f'The configuration is not valid, following errors occurred: \n{err_string}')
+
 
 """
         Main entrypoint
@@ -225,7 +237,7 @@ if __name__ == "__main__":
     try:
         comp = Component()
         comp.execute_action()
-    except UserException as exc:
+    except (UserException, GoogleDV360ClientException) as exc:
         logging.exception(exc)
         exit(1)
     except Exception as exc:
