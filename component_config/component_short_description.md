@@ -1,1 +1,1 @@
-DV360 Extractor short description
+Google Display & Video 360 is an integrated solution for end-to-end advertising campaigns.
