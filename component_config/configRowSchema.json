@@ -2526,14 +2526,6 @@
           "propertyOrder": 30
         }
       }
-    },
-    "debug": {
-      "propertyOrder": 700,
-      "title": "Debug",
-      "type": "boolean",
-      "hidden": true,
-      "description": "When checked, logging will be more verbose",
-      "format": "checkbox"
     }
   }
 }
