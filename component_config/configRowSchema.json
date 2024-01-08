@@ -9,7 +9,7 @@
   "properties": {
     "input_variant": {
       "type": "string",
-      "title": "Input variant",
+      "title": "Report definition mode",
       "propertyOrder": 100,
       "description": "You may choose to either define a new report or to enter existing report ID",
       "enum": [
@@ -104,7 +104,7 @@
     "report_specification": {
       "type": "object",
       "title": "Report Details",
-      "propertyOrder": 300,
+      "propertyOrder": 150,
       "properties": {
         "report_type": {
           "title": "Report Type",
@@ -2422,7 +2422,7 @@
     "existing_report_id": {
       "type": "string",
       "title": "Report ID",
-      "propertyOrder": 400,
+      "propertyOrder": 150,
       "minLength": 1,
       "description": "Enter report ID as presented in DV360 Report Builder",
       "enum": [],

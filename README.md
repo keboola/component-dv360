@@ -1,20 +1,80 @@
 # DV360 Extractor
 
-This data source component is using Google Bid Manager API to create and run 
-reports that measure results of Display & Video 360 advertising campaigns.
+This data source component is using Google Bid Manager API to create and run reports that measure results of Display & Video 360 advertising campaigns. Automate data retrieval from the [Display&Video 360 Reports](https://marketingplatform.google.com/about/display-video-360/). Run
+existing reports defined via the [DV360 Report Builder](https://support.google.com/displayvideo/answer/6375151?hl=en&ref_topic=2798432&sjid=18233030458040234650-EU)
+or define ADHOC reports directly from the configuration.
 
 
 **Table of contents:**
 
 [TOC]
 
+
 ## Prerequisites
 
-1. Arrange authorization of your DV360 account with Keboola support.
+1. Get access to [Display & Video 360](https://marketingplatform.google.com/about/display-video-360/) account.
 
 2. Log into your account using the Authorize Account button in the Keboola interface. 
 
 ![OAuth Authorization](docs/imgs/config_oauth.png)
+
+## Configuration
+
+The connector supports two modes:
+
+1. Running and downloading existing report definition. Such report may be defined using the [DV360 Report Builder](https://support.google.com/displayvideo/answer/6375151?hl=en&ref_topic=2798432&sjid=15077049489643424211-EU)
+   - This option is suitable when you need more control over the report definition.
+2. Defining report definition directly in the UI.
+   - This allows you to define simple report definition directly in the configuration UI.
+   - This mode will automatically create an Offline report in the [DV360 console](https://displayvideo.google.com/ng_nav/reporting), that will be linked to the configuration. The naming convention of the created report is: `keboola_generated_{PROJECT_ID}_{CONFIG_ID}_{ROWID}`
+
+### Running existing report
+
+1. Define your report in the [DV360 Report Builder](https://displayvideo.google.com/ng_nav/reporting). See the official [docs](https://support.google.com/displayvideo/answer/6375151?hl=en&ref_topic=2798432&sjid=15077049489643424211-EU).
+2. Select the `Existing report ID` in the `Report definition mode` configuration option.
+3. Select the existing report ID from the dropdown of available reports.
+4. Select the desired `Time Range`
+   - You may select either predefined period or a `Custom Date Range`
+   - This option allows you to define a relative report period range.
+5. Define the **Destination** parameters to control how the result is stored. See the `Destination` section.
+
+### Defining report directly in the UI.
+
+1. Select the `Report specification` in the `Report definition mode` configuration option.
+2. Define your report in  `Report Details`
+   1. Select the `Report Type`
+   2. Select desired dimensions
+   3. Select the desired metrics.
+   4. Optionally, specify filters.
+3. Select the desired `Time Range`
+   - You may select either predefined period or a `Custom Date Range`
+   - This option allows you to define a relative report period range.
+4. Define the **Destination** parameters to control how the result is stored. See the `Destination` section.
+
+
+
+### Destination - report output
+
+This section defines how the extracted data will be saved in the Keboola Storage.
+
+- **Load Type** – If `Full Load` is used, the destination table will be overwritten every run. If `Incremental Load` is used, data will be “upserted” into the destination table.
+- **Storage Table Name** – Name of the table stored in Storage.
+- **Primary Key** - Since the reports are always custom defined, you need to define what dimensions (columns) represent the unique primary key. This is then used to perform "upserts".
+  - Note that if the primary key is not defined properly, you may lose some data during deduplication. If there is no primary key defined and `Incremental Load` mode is used, each execution will lead to a new set of records.
+
+
+
+# Technical details
+
+
+The component uses version 2 of Google Bid Manager API.
+
+- `https://doubleclickbidmanager.googleapis.com`
+
+It handles 2 resource types:
+- v2.queries - [see reference to queries](https://doubleclickbidmanager.googleapis.com)
+- v2.queries.reports - [see reference to reports](https://developers.google.com/bid-manager/reference/rest#rest-resource:-v2.queries.reports)
+
 
 ## Features
 
@@ -28,46 +88,8 @@ reports that measure results of Display & Video 360 advertising campaigns.
 | Date range filter       | Specify date range.                           |
 
 
-## Supported endpoints
 
-The component uses version 2 of Google Bid Manager API.
-
-- `https://doubleclickbidmanager.googleapis.com`
-
-It handles 2 resource types:
-- v2.queries - [see reference to queries](https://doubleclickbidmanager.googleapis.com)
-- v2.queries.reports - [see reference to reports](https://developers.google.com/bid-manager/reference/rest#rest-resource:-v2.queries.reports)
-
-## Configuration
-
-Component uses 2 configuration variants:
-- Full report specification
-- Report ID of existing report
-
-In both cases it is possible to specify date ranges for the run of the report.
-
-##DV360 Report
- - Input variant (input_variant) - [REQ] You may choose to either define a new report or to enter existing report ID
- - Time Range (time_range) - [REQ] description
- - Report Period (period) - [OPT] description
- - Date from (date_from) - [OPT] Start date: Either date in YYYY-MM-DD format or a relative date string i.e. 5 days ago, 1 month ago, yesterday, etc.
- - Date to (date_to) - [OPT] End date: Either date in YYYY-MM-DD format or a relative date string i.e. 5 days ago, 1 month ago, yesterday, etc.
- - Report Details (report_specification) - [OPT] description
- - Report Type (report_type) - [OPT] description
- - Dimensions (dimensions) - [OPT] description
- - Metrics (metrics) - [OPT] description
- - Filters (filters) - [OPT] description
- - Report ID (existing_report_id) - [OPT] Enter report ID as presented in DV360 Report Builder
- - Destination (destination) - [REQ] description
- - Selected variant (selected_variant) - [OPT] Helper dummy element to render pkeys
- - Storage Table Name (table_name) - [REQ] Name of the destination table for this report. (e.g. standard_performance_data).
- - Primary Key (primary_key) - [REQ] List of columns (from selected dimensions) to be used as primary key of the resulting table. We recommend using ID columns where possible, to avoid ambiguity in case the dimension name is changed.
- - Primary Key (primary_key_existing) - [OPT] List of columns (load from report) to be used as primary key of the resulting table. We recommend using ID columns where possible, to avoid ambiguity in case the dimension name is changed.
- - Load Type (incremental_loading) - [REQ] If Full load is used, the destination table will be overwritten every run. If Incremental Load is used, data will be upserted into the destination table.
- - Debug (debug) - [OPT] When checked, logging will be more verbose
-
-
-## Sample Configuration
+## Sample Raw Configuration
 
 ```json
 {
