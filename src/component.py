@@ -8,6 +8,7 @@ import logging
 
 import dataconf
 import requests
+from google.auth.exceptions import RefreshError
 from keboola.component.base import ComponentBase, sync_action
 from keboola.component.exceptions import UserException
 from keboola.utils.header_normalizer import DefaultHeaderNormalizer
@@ -159,8 +160,8 @@ class Component(ComponentBase):
         import os
         configrow_id = os.getenv('KBC_CONFIGROWID', 'xxxxxx')
         return 'keboola_generated_' + self.environment_variables.project_id + '_' + \
-               self.environment_variables.config_id + '_' + \
-               configrow_id
+            self.environment_variables.config_id + '_' + \
+            configrow_id
 
     @sync_action('list_queries')
     def list_queries(self):
@@ -239,6 +240,9 @@ if __name__ == "__main__":
         comp.execute_action()
     except (UserException, GoogleDV360ClientException) as exc:
         logging.exception(exc)
+        exit(1)
+    except RefreshError as exc:
+        logging.error("The OAuth token has expired. Please reauthorize the application.", extra={"exception": exc})
         exit(1)
     except Exception as exc:
         logging.exception(exc)
