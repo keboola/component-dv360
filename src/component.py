@@ -76,6 +76,9 @@ class Component(ComponentBase):
         self.save_state(report_response)
 
     def _get_google_client(self):
+        if not self.configuration.oauth_credentials:
+            raise UserException("The configuration is not authorized. Please authorize the configuration first.")
+
         client = GoogleDV360Client(
             self.configuration.oauth_credentials.appKey,
             self.configuration.oauth_credentials.appSecret,
