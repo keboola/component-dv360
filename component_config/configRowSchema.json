@@ -1,5 +1,5 @@
 {
-  "title": "DV360 Report",
+  "title": "DV360 report",
   "type": "object",
   "required": [
     "input_variant",
@@ -11,7 +11,7 @@
       "type": "string",
       "title": "Report definition mode",
       "propertyOrder": 100,
-      "description": "You may choose to either define a new report or to enter existing report ID",
+      "description": "You may choose to either create a new report or use an existing report ID.",
       "enum": [
         "report_specification",
         "existing_report_id"
@@ -26,12 +26,12 @@
     },
     "time_range": {
       "type": "object",
-      "title": "Time Range",
+      "title": "Time range",
       "propertyOrder": 200,
       "properties": {
         "period": {
           "type": "string",
-          "title": "Report Period",
+          "title": "Report period",
           "propertyOrder": 10,
           "default": "LAST_7_DAYS",
           "enum": [
@@ -47,12 +47,12 @@
             "PREVIOUS_QUARTER",
             "PREVIOUS_YEAR",
             "LAST_7_DAYS",
+            "LAST_14_DAYS",
             "LAST_30_DAYS",
+            "LAST_60_DAYS",
             "LAST_90_DAYS",
             "LAST_365_DAYS",
-            "ALL_TIME",
-            "LAST_14_DAYS",
-            "LAST_60_DAYS"
+            "ALL_TIME"
           ],
           "options": {
             "enum_titles": [
@@ -68,12 +68,12 @@
               "The previous completed quarter",
               "The previous completed calendar year",
               "The previous 7 days, excluding the current day",
+              "The previous 14 days, excluding the current day",
               "The previous 30 days, excluding the current day",
+              "The previous 60 days, excluding the current day",
               "The previous 90 days, excluding the current day",
               "The previous 365 days, excluding the current day",
-              "All time for which data is available, excluding the current day",
-              "The previous 14 days, excluding the current day",
-              "The previous 60 days, excluding the current day"
+              "All data, excluding the current day"
             ]
           }
         },
@@ -81,7 +81,7 @@
           "type": "string",
           "title": "Date from",
           "propertyOrder": 20,
-          "description": "Start date: Either date in YYYY-MM-DD format or a relative date string i.e. 5 days ago, 1 month ago, yesterday, etc.",
+          "description": "Start date: Either in YYYY-MM-DD format or a relative date string, e.g., 5 days ago, 1 month ago, yesterday, etc.",
           "options": {
             "dependencies": {
               "period": "CUSTOM_DATES"
@@ -92,7 +92,7 @@
           "type": "string",
           "title": "Date to",
           "propertyOrder": 30,
-          "description": "End date: Either date in YYYY-MM-DD format or a relative date string i.e. 5 days ago, 1 month ago, yesterday, etc.",
+          "description": "End date: Either in YYYY-MM-DD format or a relative date string, e.g., 5 days ago, 1 month ago, yesterday, etc.",
           "options": {
             "dependencies": {
               "period": "CUSTOM_DATES"
@@ -103,11 +103,11 @@
     },
     "report_specification": {
       "type": "object",
-      "title": "Report Details",
+      "title": "Report details",
       "propertyOrder": 150,
       "properties": {
         "report_type": {
-          "title": "Report Type",
+          "title": "Report type",
           "type": "string",
           "enum": [
             "STANDARD",
@@ -2424,7 +2424,7 @@
       "title": "Report ID",
       "propertyOrder": 150,
       "minLength": 1,
-      "description": "Enter report ID as presented in DV360 Report Builder",
+      "description": "Enter the report ID as presented in the DV360 Report Builder.",
       "enum": [],
       "options": {
         "dependencies": {
@@ -2460,15 +2460,15 @@
         },
         "table_name": {
           "type": "string",
-          "title": "Storage Table Name",
+          "title": "Storage table name",
           "propertyOrder": 10,
           "minLength": 1,
-          "description": "Name of the destination table for this report. (e.g. standard_performance_data)."
+          "description": "Name of the destination table for this report (e.g., standard_performance_data)"
         },
         "primary_key": {
           "type": "array",
-          "title": "Primary Key",
-          "description": "List of columns (from selected dimensions) to be used as primary key of the resulting table. We recommend using ID columns where possible, to avoid ambiguity in case the dimension name is changed.",
+          "title": "Primary key",
+          "description": "List of columns (from selected dimensions) to be used as the primary key of the resulting table. We recommend using ID columns where possible to avoid ambiguity if the dimension name changes.",
           "propertyOrder": 20,
           "format": "select",
           "uniqueItems": true,
@@ -2487,8 +2487,8 @@
         },
         "primary_key_existing": {
           "type": "array",
-          "title": "Primary Key",
-          "description": "List of columns (load from report) to be used as primary key of the resulting table. We recommend using ID columns where possible, to avoid ambiguity in case the dimension name is changed.",
+          "title": "Primary key",
+          "description": "List of columns (load from report) to be used as the primary key of the resulting table. We recommend using ID columns where possible to avoid ambiguity if the dimension name changes.",
           "propertyOrder": 21,
           "format": "select",
           "uniqueItems": true,
@@ -2514,15 +2514,15 @@
             true
           ],
           "type": "boolean",
-          "title": "Load Type",
+          "title": "Load type",
           "default": true,
           "options": {
             "enum_titles": [
-              "Full Load",
-              "Incremental Load"
+              "Full load",
+              "Incremental load"
             ]
           },
-          "description": "If Full load is used, the destination table will be overwritten every run. If Incremental Load is used, data will be upserted into the destination table.",
+          "description": "If full load is used, the destination table will be overwritten every run. If incremental load is used, data will be upserted into the destination table.",
           "propertyOrder": 30
         }
       }
