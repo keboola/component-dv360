@@ -11,7 +11,7 @@
       "type": "string",
       "title": "Report definition mode",
       "propertyOrder": 100,
-      "description": "You may choose to either specify a new report or to enter an existing report ID.",
+      "description": "You may choose to either create a new report or use existing report ID.",
       "enum": [
         "report_specification",
         "existing_report_id"
@@ -73,7 +73,7 @@
               "The previous 60 days, excluding the current day",
               "The previous 90 days, excluding the current day",
               "The previous 365 days, excluding the current day",
-              "All time for which data is available, excluding the current day"
+              "All data, excluding the current day"
             ]
           }
         },

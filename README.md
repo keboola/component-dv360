@@ -36,23 +36,23 @@ The connector supports two modes:
 1. Define your report in the [DV360 Report Builder](https://displayvideo.google.com/ng_nav/reporting). See the official [docs](https://support.google.com/displayvideo/answer/6375151?hl=en&ref_topic=2798432&sjid=15077049489643424211-EU).
 2. Select the `Existing report ID` in the `Report definition mode` configuration option.
 3. Select the existing report ID from the dropdown of available reports.
-4. Define the desired `Time Range`.
+4. Set the desired `Time Range`.
    - You may select either a predefined period or a `Custom Date Range`.
    - This option allows you to define a relative report period range.
-5. Define the **destination** parameters to control how the result is stored. See the `Destination` section.
+5. Set the **destination** parameters to control how the result is stored. See the `Destination` section.
 
 ### Defining a report directly in the UI
 
 1. Select the `Report specification` in the `Report definition mode` configuration option.
-2. Define your report in  `Report Details`.
+2. Set up your report in  `Report Details`.
    1. Select the `Report Type`.
    2. Select the desired dimensions.
    3. Select the desired metrics.
    4. Optionally, specify filters.
-3. Define the desired `Time Range`.
+3. Set the desired `Time Range`.
    - You may select either a predefined period or a `Custom Date Range`.
    - This option allows you to define a relative report period range.
-4. Define the **destination** parameters to control how the result is stored. See the `Destination` section.
+4. Set the **destination** parameters to control how the result is stored. See the `Destination` section.
 
 
 
@@ -181,7 +181,7 @@ It handles 2 resource types:
 Output
 ======
 
-List of tables, foreign keys, and a schema.
+The schema and a list of tables and foreign keys.
 
 Development
 -----------

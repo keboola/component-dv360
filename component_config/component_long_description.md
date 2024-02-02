@@ -4,6 +4,6 @@ or define ad-hoc reports directly from the configuration.
 
 **Google Limited Use Policy Disclosure:**
 
-The app’s use and transfer to any other app of information received from Google APIs will adhere
+The app’s use and transfer to any other app of information received from Google APIs adheres
 to [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes)
 , including the Limited Use requirements.
