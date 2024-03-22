@@ -98,6 +98,11 @@ class Component(ComponentBase):
     @staticmethod
     def extract_csv_from_raw(raw_file: str, csv_file: str):
         with open(raw_file, 'r') as src, open(csv_file, 'w') as dst:
+            line = src.readline()
+            header_normalizer = DefaultHeaderNormalizer()
+            normalized = header_normalizer.normalize_header(line.split(","))
+            dst.write(', '.join(normalized))
+
             while True:
                 line = src.readline()
                 if not line or line.startswith(',') or line == '\n':
