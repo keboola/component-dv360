@@ -101,7 +101,7 @@ class Component(ComponentBase):
             line = src.readline()
             header_normalizer = DefaultHeaderNormalizer()
             normalized = header_normalizer.normalize_header(line.split(","))
-            dst.write(', '.join(normalized))
+            dst.write(', '.join(normalized) + '\n')
 
             while True:
                 line = src.readline()
