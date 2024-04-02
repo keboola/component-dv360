@@ -8,7 +8,6 @@ pipelines:
           - docker
         script:
           - export APP_IMAGE=keboola-component
-          - export TAG=${BITBUCKET_BRANCH//\//-}
           - docker build . --tag=$APP_IMAGE
           - docker images
           - docker -v
@@ -16,11 +15,12 @@ pipelines:
           - echo "Running unit-tests..."
           - docker run $APP_IMAGE python -m unittest discover
           # push test image to ecr - uncomment for testing before deployment
-          - echo "Pushing test image to repo. [tag=${TAG}]"
+          - export TEST_TAG=${BITBUCKET_BRANCH//\//-}
+          - echo "Pushing test image to repo. [tag=${TEST_TAG}]"
           - export REPOSITORY=`docker run --rm -e KBC_DEVELOPERPORTAL_USERNAME -e KBC_DEVELOPERPORTAL_PASSWORD -e KBC_DEVELOPERPORTAL_URL quay.io/keboola/developer-portal-cli-v2:latest ecr:get-repository $KBC_DEVELOPERPORTAL_VENDOR $KBC_DEVELOPERPORTAL_APP`
-          - docker tag $APP_IMAGE:latest $REPOSITORY:$TAG
+          - docker tag $APP_IMAGE:latest $REPOSITORY:$TEST_TAG
           - eval $(docker run --rm -e KBC_DEVELOPERPORTAL_USERNAME -e KBC_DEVELOPERPORTAL_PASSWORD -e KBC_DEVELOPERPORTAL_URL quay.io/keboola/developer-portal-cli-v2:latest ecr:get-login $KBC_DEVELOPERPORTAL_VENDOR $KBC_DEVELOPERPORTAL_APP)
-          - docker push $REPOSITORY:$TAG
+          - docker push $REPOSITORY:$TEST_TAG
 
 
   branches:
@@ -30,7 +30,6 @@ pipelines:
             - docker
           script:
             - export APP_IMAGE=keboola-component
-            - export TAG=${BITBUCKET_BRANCH//\//-}
             - docker build . --tag=$APP_IMAGE
             - docker images
             - docker -v
@@ -38,11 +37,12 @@ pipelines:
             - echo "Running unit-tests..."
             - docker run $APP_IMAGE python -m unittest discover
             # push test image to ecr - uncomment for testing before deployment
-            - echo "Pushing test image to repo. [tag=${TAG}]"
+            - export TEST_TAG=${BITBUCKET_BRANCH//\//-}
+            - echo "Pushing test image to repo. [tag=${TEST_TAG}]"
             - export REPOSITORY=`docker run --rm -e KBC_DEVELOPERPORTAL_USERNAME -e KBC_DEVELOPERPORTAL_PASSWORD -e KBC_DEVELOPERPORTAL_URL quay.io/keboola/developer-portal-cli-v2:latest ecr:get-repository $KBC_DEVELOPERPORTAL_VENDOR $KBC_DEVELOPERPORTAL_APP`
-            - docker tag $APP_IMAGE:latest $REPOSITORY:$TAG
+            - docker tag $APP_IMAGE:latest $REPOSITORY:$TEST_TAG
             - eval $(docker run --rm -e KBC_DEVELOPERPORTAL_USERNAME -e KBC_DEVELOPERPORTAL_PASSWORD -e KBC_DEVELOPERPORTAL_URL quay.io/keboola/developer-portal-cli-v2:latest ecr:get-login $KBC_DEVELOPERPORTAL_VENDOR $KBC_DEVELOPERPORTAL_APP)
-            - docker push $REPOSITORY:$TAG
+            - docker push $REPOSITORY:$TEST_TAG
             - chmod +x ./scripts/update_dev_portal_properties.sh
             - ./scripts/update_dev_portal_properties.sh
   tags:
@@ -64,7 +64,6 @@ pipelines:
             # - eval $(docker run --rm -e KBC_DEVELOPERPORTAL_USERNAME -e KBC_DEVELOPERPORTAL_PASSWORD -e KBC_DEVELOPERPORTAL_URL quay.io/keboola/developer-portal-cli-v2:latest ecr:get-login $KBC_DEVELOPERPORTAL_VENDOR $KBC_DEVELOPERPORTAL_APP)
             # - docker push $REPOSITORY:test
             # - docker run --rm -e KBC_STORAGE_TOKEN quay.io/keboola/syrup-cli:latest run-job $KBC_DEVELOPERPORTAL_APP $BASE_KBC_CONFIG test
-            # - docker run --rm -e KBC_STORAGE_TOKEN quay.io/keboola/syrup-cli:latest run-job $KBC_DEVELOPERPORTAL_APP $KBC_CONFIG_1 test
             - chmod +x ./scripts/update_dev_portal_properties.sh
             - chmod +x ./deploy.sh
             - ./scripts/update_dev_portal_properties.sh
