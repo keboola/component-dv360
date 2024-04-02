@@ -17,6 +17,7 @@ class Destination:
     incremental_loading: bool = True
     primary_key: list[str] = None
     primary_key_existing: list[str] = None
+    normalize_header: bool = True
 
 
 @dataclass

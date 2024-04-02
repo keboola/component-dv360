@@ -96,12 +96,14 @@ class Component(ComponentBase):
                 out.write(chunk)
 
     @staticmethod
-    def extract_csv_from_raw(raw_file: str, csv_file: str):
+    def extract_csv_from_raw(raw_file: str, csv_file: str, normalize_header: bool = True):
         with open(raw_file, 'r') as src, open(csv_file, 'w') as dst:
-            line = src.readline()
-            header_normalizer = DefaultHeaderNormalizer()
-            normalized = header_normalizer.normalize_header(line.split(","))
-            dst.write(', '.join(normalized) + '\n')
+            # To ensure compatibility: https://bitbucket.org/kds_consulting_team/kds-team.ex-dv360/pull-requests/10
+            if normalize_header:
+                line = src.readline()
+                header_normalizer = DefaultHeaderNormalizer()
+                normalized = header_normalizer.normalize_header(line.split(","))
+                dst.write(', '.join(normalized) + '\n')
 
             while True:
                 line = src.readline()
@@ -129,7 +131,7 @@ class Component(ComponentBase):
 
         raw_output_file = self.files_out_path + '/' + result_table.name + '.raw.txt'
         self.download_file(contents_url, raw_output_file)
-        self.extract_csv_from_raw(raw_output_file, result_table.full_path)
+        self.extract_csv_from_raw(raw_output_file, result_table.full_path, self.cfg.destination.normalize_header)
 
     def save_state(self, report_response):
         cur_state = dict(
