@@ -2436,6 +2436,31 @@
         }
       }
     },
+    "metadata_fields": {
+      "type": "array",
+      "title": "Metadata fields",
+      "description": "List of metadata fields to include in the report.",
+      "propertyOrder": 160,
+      "default": [],
+      "items": {
+        "type": "string",
+        "enum": [
+          "state",
+          "finishTime",
+          "format",
+          "reportDataStartDate",
+          "reportDataEndDate",
+          "googleCloudStoragePath"
+        ]
+      },
+      "options": {
+        "dependencies": {
+          "input_variant": "existing_report_id"
+        }
+      },
+      "format": "select",
+      "uniqueItems": true
+    },
     "destination": {
       "title": "Destination",
       "type": "object",

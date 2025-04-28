@@ -50,6 +50,7 @@ class Configuration(ConfigurationBase):
     time_range: TimeRange
     report_specification: ReportSettings = field(default_factory=lambda: ConfigTree({}))
     existing_report_id: str = ""
+    metadata_fields: list[str] = field(default_factory=list)
     debug: bool = False
 
     def __eq__(self, other):

@@ -69,6 +69,15 @@ class Component(ComponentBase):
         # https://developers.google.com/bid-manager/reference/rest/v2/queries.reports#Report
         report_response = client.wait_report(report_id, report_run_id)
 
+        metadata = None
+        if (
+            self.cfg.input_variant == 'existing_report_id'
+            and self.cfg.metadata_fields
+        ):
+            metadata = self.extract_report_metadata(report_response, self.cfg.metadata_fields)
+            logging.info(f"Extracted report metadata: {metadata}")
+            self.write_metadata_table(metadata)
+
         contents_url = report_response['metadata']['googleCloudStoragePath']
 
         self.write_report(contents_url)
@@ -239,6 +248,43 @@ class Component(ComponentBase):
         if errors:
             err_string = '\n'.join(errors)
             raise UserException(f'The configuration is not valid, following errors occurred: \n{err_string}')
+
+    def extract_report_metadata(self, report_response: dict, fields: list[str] = None) -> dict:
+        """
+        Extracts selected metadata fields from a DV360 report response.
+
+        Args:
+            report_response: The full response from the queries.reports.get() call.
+            fields: List of metadata field names to extract. If None, extract all default fields.
+
+        Returns:
+            Dictionary with selected metadata fields.
+        """
+        metadata = report_response.get('metadata', {})
+        status = metadata.get('status', {})
+        all_fields = {
+            "state": status.get("state"),
+            "finishTime": status.get("finishTime"),
+            "format": status.get("format"),
+            "reportDataStartDate": metadata.get("reportDataStartDate"),
+            "reportDataEndDate": metadata.get("reportDataEndDate"),
+            "googleCloudStoragePath": metadata.get("googleCloudStoragePath"),
+        }
+        return {field: all_fields.get(field) for field in fields}
+
+    def write_metadata_table(self, metadata: dict, filename: str = "report_metadata.csv"):
+        """
+        Writes metadata dictionary to a CSV file as key-value pairs.
+
+        Args:
+            metadata: dict of metadata fields
+            filename: output CSV filename (relative to files_out_path)
+        """
+        full_path = self.files_out_path + '/' + filename
+        with open(full_path, 'w', encoding='utf-8') as f:
+            f.write("field,value\n")
+            for k, v in metadata.items():
+                f.write(f"{k},{v}\n")
 
 
 """
