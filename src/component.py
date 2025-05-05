@@ -69,14 +69,12 @@ class Component(ComponentBase):
         # Response structure is documented here:
         # https://developers.google.com/bid-manager/reference/rest/v2/queries.reports#Report
         report_response = client.wait_report(report_id, report_run_id)
-        logging.info(f"Report response: {report_response}")
 
         if (
             self.cfg.input_variant == 'existing_report_id'
             and self.cfg.metadata_fields
         ):
             metadata = self.extract_report_metadata(report_response, self.cfg.metadata_fields)
-            logging.info(f"Extracted report metadata: {metadata}")
             self.write_metadata_table(metadata, f"{self.cfg.destination.table_name}_metadata.csv")
 
         contents_url = report_response['metadata']['googleCloudStoragePath']
@@ -137,7 +135,6 @@ class Component(ComponentBase):
         result_table = self.create_out_table_definition(f"{self.cfg.destination.table_name}.csv",
                                                         primary_key=pks,
                                                         incremental=self.cfg.destination.incremental_loading)
-        logging.info(f"Result table: {result_table}")
         self.write_manifest(result_table)
 
         raw_output_file = self.files_out_path + '/' + result_table.name + '.raw.txt'
