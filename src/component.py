@@ -5,6 +5,7 @@ Template Component main class.
 # from typing import List, Tuple
 import json
 import logging
+import os
 
 import dataconf
 import requests
@@ -68,15 +69,15 @@ class Component(ComponentBase):
         # Response structure is documented here:
         # https://developers.google.com/bid-manager/reference/rest/v2/queries.reports#Report
         report_response = client.wait_report(report_id, report_run_id)
+        logging.info(f"Report response: {report_response}")
 
-        metadata = None
         if (
             self.cfg.input_variant == 'existing_report_id'
             and self.cfg.metadata_fields
         ):
             metadata = self.extract_report_metadata(report_response, self.cfg.metadata_fields)
             logging.info(f"Extracted report metadata: {metadata}")
-            self.write_metadata_table(metadata)
+            self.write_metadata_table(metadata, f"{self.cfg.destination.table_name}_metadata.csv")
 
         contents_url = report_response['metadata']['googleCloudStoragePath']
 
@@ -136,9 +137,11 @@ class Component(ComponentBase):
         result_table = self.create_out_table_definition(f"{self.cfg.destination.table_name}.csv",
                                                         primary_key=pks,
                                                         incremental=self.cfg.destination.incremental_loading)
+        logging.info(f"Result table: {result_table}")
         self.write_manifest(result_table)
 
         raw_output_file = self.files_out_path + '/' + result_table.name + '.raw.txt'
+        os.makedirs(os.path.dirname(raw_output_file), exist_ok=True)
         self.download_file(contents_url, raw_output_file)
         self.extract_csv_from_raw(raw_output_file, result_table.full_path, self.cfg.destination.normalize_header)
 
@@ -272,19 +275,27 @@ class Component(ComponentBase):
         }
         return {field: all_fields.get(field) for field in fields}
 
-    def write_metadata_table(self, metadata: dict, filename: str = "report_metadata.csv"):
+    def write_metadata_table(self, metadata: dict, filename: str):
         """
-        Writes metadata dictionary to a CSV file as key-value pairs.
-
+        Writes metadata dictionary to a CSV file as key-value pairs using
+        Keboola's native table definition and manifest.
         Args:
             metadata: dict of metadata fields
-            filename: output CSV filename (relative to files_out_path)
+            filename: output CSV filename (relative to tables_out_path)
         """
-        full_path = self.files_out_path + '/' + filename
-        with open(full_path, 'w', encoding='utf-8') as f:
-            f.write("field,value\n")
+        columns = ["field", "value"]
+        table_def = self.create_out_table_definition(
+            filename,
+            primary_key=[],
+            incremental=False,
+            columns=columns
+        )
+        os.makedirs(os.path.dirname(table_def.full_path), exist_ok=True)
+        with open(table_def.full_path, 'w', encoding='utf-8') as f:
+            f.write(",".join(columns) + "\n")
             for k, v in metadata.items():
                 f.write(f"{k},{v}\n")
+        self.write_manifest(table_def)
 
 
 """
