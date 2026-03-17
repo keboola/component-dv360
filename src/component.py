@@ -159,6 +159,11 @@ class Component(ComponentBase):
             return None
         prev_report_id = prev_state['report']['key']['queryId']
         prev_cfg = Configuration.fromDict(prev_state.get('configuration'))
+        # DV360 queries are scoped to account state at creation time.
+        # New Partners/Advertisers added after query creation are silently excluded.
+        # Always create a fresh query so the current account structure is reflected.
+        if self.cfg.input_variant == 'report_specification':
+            return None
         if prev_cfg == self.cfg:
             # check for query existence
             q = client.get_query(prev_report_id)
