@@ -2,7 +2,13 @@
 Template Component main class.
 
 """
-# from typing import List, Tuple
+import warnings
+
+# Suppress FutureWarning from google.api_core about Python version deprecation.
+# On Python 3.10 the warning is routed through the logging system to stdout,
+# which corrupts the JSON payload returned by sync actions.
+warnings.filterwarnings("ignore", category=FutureWarning, module=r"google\.api_core")
+
 import json
 import logging
 
@@ -184,9 +190,13 @@ class Component(ComponentBase):
 
         Returns: List of dictionaries having value and label attributes.
         """
-        client = self._get_google_client()
-        queries = client.list_queries()
-        # wish was to include query creation date but tha info is not available in the service
+        try:
+            client = self._get_google_client()
+            queries = client.list_queries()
+        except UserException:
+            raise
+        except Exception as e:
+            raise UserException(f'Failed to load available reports: {e}') from e
         resp = [dict(value=q[0], label=f'{q[0]} - {q[1]}') for q in queries]
         return resp
 
@@ -199,8 +209,13 @@ class Component(ComponentBase):
         existing_report_id = self.configuration.parameters.get('existing_report_id')
         if not existing_report_id:
             raise UserException('No report ID provided.')
-        client = self._get_google_client()
-        query = client.get_query(query_id=existing_report_id)
+        try:
+            client = self._get_google_client()
+            query = client.get_query(query_id=existing_report_id)
+        except UserException:
+            raise
+        except Exception as e:
+            raise UserException(f'Failed to load report dimensions: {e}') from e
         if not query:
             raise UserException(f'Report id = {existing_report_id} was not found')
         table = get_filter_table()
