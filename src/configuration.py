@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
+
 import dataconf
-
-
 from pyhocon.config_tree import ConfigTree
 
 
@@ -36,7 +35,6 @@ class ReportSettings:
 
 
 class ConfigurationBase:
-
     @staticmethod
     def fromDict(parameters: dict):
         return dataconf.dict(parameters, Configuration, ignore_unexpected=True)
@@ -59,7 +57,7 @@ class Configuration(ConfigurationBase):
             return self.report_specification == other.report_specification
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     json_conf_1 = """
     {
       "input_variant": "report_specification",
@@ -137,19 +135,12 @@ if __name__ == '__main__':
 
     pars = {
         "input_variant": "report_specification",
-        "time_range": {
-            "period": "LAST_90_DAYS",
-            "date_from": "yesterday",
-            "date_to": "dneska"
-        },
+        "time_range": {"period": "LAST_90_DAYS", "date_from": "yesterday", "date_to": "dneska"},
         "destination": {
             "table_name": "report_row_1.csv",
-            "primary_key": [
-                "FILTER_ADVERTISER",
-                "FILTER_BROWSER"
-            ],
+            "primary_key": ["FILTER_ADVERTISER", "FILTER_BROWSER"],
             "incremental_loading": True,
-        }
+        },
     }
 
     cf3 = Configuration.fromDict(pars)

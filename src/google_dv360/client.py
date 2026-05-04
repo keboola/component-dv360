@@ -1,6 +1,5 @@
 import logging
 import time
-from typing import List, Tuple
 
 import dateparser
 from google_auth_oauthlib.flow import Flow
@@ -13,7 +12,7 @@ class GoogleDV360ClientException(UserException):
     pass
 
 
-def get_date_period_converted(period_from: str, period_to: str) -> Tuple[dict, dict]:
+def get_date_period_converted(period_from: str, period_to: str) -> tuple[dict, dict]:
     """
     Returns given period parameters in datetime format, or next step in back-fill mode
     along with generated last state for next iteration.
@@ -32,15 +31,9 @@ def get_date_period_converted(period_from: str, period_to: str) -> Tuple[dict, d
     if day_diff < 0:
         raise UserException("start_date cannot exceed end_date.")
 
-    start = dict(
-        year=start_date_form.year,
-        month=start_date_form.month,
-        day=start_date_form.day)
+    start = dict(year=start_date_form.year, month=start_date_form.month, day=start_date_form.day)
 
-    end = dict(
-        year=end_date_form.year,
-        month=end_date_form.month,
-        day=end_date_form.day)
+    end = dict(year=end_date_form.year, month=end_date_form.month, day=end_date_form.day)
 
     return start, end
 
@@ -57,36 +50,36 @@ class GoogleDV360Client:
         # oauth_credentials.data .. token_data
         self.service = None
         token_response = token_data
-        token_response['expires_at'] = 22222
+        token_response["expires_at"] = 22222
         client_secrets = {
             "web": {
                 "client_id": client_id,
                 "client_secret": app_secret,
                 "redirect_uris": ["https://www.example.com/oauth2callback"],
                 "auth_uri": "https://oauth2.googleapis.com/auth",
-                "token_uri": "https://oauth2.googleapis.com/token"
+                "token_uri": "https://oauth2.googleapis.com/token",
             }
         }
-        scopes = ['https://www.googleapis.com/auth/doubleclickbidmanager']
+        scopes = ["https://www.googleapis.com/auth/doubleclickbidmanager"]
         credentials = Flow.from_client_config(client_secrets, scopes=scopes, token=token_response).credentials
-        discovery_url = 'https://doubleclickbidmanager.googleapis.com/$discovery/rest?version=v2'
+        discovery_url = "https://doubleclickbidmanager.googleapis.com/$discovery/rest?version=v2"
         # Build the API service.
         self.service = discovery.build(
-            'doubleclickbidmanager',
-            'v2',
-            discoveryServiceUrl=discovery_url,
-            credentials=credentials)
+            "doubleclickbidmanager", "v2", discoveryServiceUrl=discovery_url, credentials=credentials
+        )
 
     def test_connection(self):
         # TODO: implement
         pass
 
-    def create_report(self,
-                      report_name: str,
-                      report_type: str,
-                      dimensions: List[str],
-                      metrics: List[str],
-                      filters: List[Tuple[str, str]]) -> str:
+    def create_report(
+        self,
+        report_name: str,
+        report_type: str,
+        dimensions: list[str],
+        metrics: list[str],
+        filters: list[tuple[str, str]],
+    ) -> str:
         """
 
         Args:
@@ -100,35 +93,27 @@ class GoogleDV360Client:
 
         """
         body = {
-            "metadata": {
-                "title": report_name,
-                "format": "CSV",
-                "dataRange": {
-                    "range": "PREVIOUS_DAY"
-                }
-            },
+            "metadata": {"title": report_name, "format": "CSV", "dataRange": {"range": "PREVIOUS_DAY"}},
             "params": {
                 "type": report_type,
                 "groupBys": dimensions,
                 "filters": [dict(type=f[0], value=f[1]) for f in filters],
-                "metrics": metrics
+                "metrics": metrics,
             },
-            "schedule": {
-                "frequency": "ONE_TIME"
-            }
+            "schedule": {"frequency": "ONE_TIME"},
         }
         m = self.service.queries().create(body=body)
         try:
             response = m.execute()
         except Exception as ex:
-            if hasattr(ex, 'reason'):
+            if hasattr(ex, "reason"):
                 raise UserException(ex.reason)
             raise ex
-        report_id = response['queryId']
+        report_id = response["queryId"]
         return report_id
 
     def run_report(self, report_id: str, data_range: str, date_from=None, date_to=None):
-        """ Run a specific query within specified date range.
+        """Run a specific query within specified date range.
 
         Args:
             report_id: existing query id (corresponds to report ID from dv360 console)
@@ -139,18 +124,15 @@ class GoogleDV360Client:
         Returns: ID of started report run
 
         """
-        body = {
-            "dataRange": {
-                "range": data_range
-            }
-        }
-        if data_range == 'CUSTOM_DATES':
+        body = {"dataRange": {"range": data_range}}
+        if data_range == "CUSTOM_DATES":
             body["dataRange"]["customStartDate"], body["dataRange"]["customEndDate"] = get_date_period_converted(
-                date_from, date_to)
+                date_from, date_to
+            )
         try:
             m = self.service.queries().run(body=body, queryId=report_id)
             response = m.execute()
-            run_id = response['key']['reportId']
+            run_id = response["key"]["reportId"]
             logging.info(f"Running query : {report_id}:{run_id}")
             return run_id
         except HttpError as e:
@@ -160,7 +142,7 @@ class GoogleDV360Client:
                 raise e
 
     def wait_report(self, report_id: str, run_id: str) -> dict:
-        """ Method keeps querying state of
+        """Method keeps querying state of
 
         Args:
             report_id:
@@ -174,17 +156,17 @@ class GoogleDV360Client:
         m = self.service.queries().reports().get(queryId=report_id, reportId=run_id)
         while True:  # TODO: consider some timeout - currently we terminate on 'DONE' or abort on error
             response = m.execute()
-            state = response['metadata']['status']['state']
+            state = response["metadata"]["status"]["state"]
             logging.info(f"Checking report state : {state}")
-            if state == 'DONE':
+            if state == "DONE":
                 return response
-            if state == 'FAILED':
-                report_type = response['params']['type']
-                raise GoogleDV360ClientException(f'report ({report_type}) failed: {response["metadata"]}')
+            if state == "FAILED":
+                report_type = response["params"]["type"]
+                raise GoogleDV360ClientException(f"report ({report_type}) failed: {response['metadata']}")
             time.sleep(30)
 
     def list_queries(self) -> list[(str, str)]:
-        """ List all queries associated with authorized user.
+        """List all queries associated with authorized user.
 
         Returns: list of tuples - (query id, query name)
 
@@ -192,10 +174,10 @@ class GoogleDV360Client:
         page_token = None
         query_list = []
         while True:
-            response = self.service.queries().list(pageSize=100, orderBy='queryId desc', pageToken=page_token).execute()
-            if 'queries' in response:
-                query_list.extend([(query['queryId'], query['metadata']['title']) for query in response['queries']])
-                page_token = response.get('nextPageToken')
+            response = self.service.queries().list(pageSize=100, orderBy="queryId desc", pageToken=page_token).execute()
+            if "queries" in response:
+                query_list.extend([(query["queryId"], query["metadata"]["title"]) for query in response["queries"]])
+                page_token = response.get("nextPageToken")
                 if not page_token:
                     break
             else:
@@ -203,7 +185,7 @@ class GoogleDV360Client:
         return query_list
 
     def get_query(self, query_id: str) -> object | None:
-        """ Search for specific query
+        """Search for specific query
 
         If query exists corresponding dv360 object will be returned.
 
