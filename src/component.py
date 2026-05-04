@@ -132,7 +132,7 @@ class Component(ComponentBase):
             else self.cfg.destination.primary_key
         )
         header_normalizer = DefaultHeaderNormalizer()
-        pks = header_normalizer.normalize_header(translate_filters(pks_raw))
+        pks = header_normalizer.normalize_header(translate_filters(pks_raw or []))
         result_table = self.create_out_table_definition(
             f"{self.cfg.destination.table_name}.csv",
             primary_key=pks,
