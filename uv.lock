@@ -342,10 +342,10 @@ requires-dist = [
     { name = "dateparser", specifier = "~=1.1.7" },
     { name = "google-api-python-client", specifier = "==2.71.0" },
     { name = "google-auth-oauthlib", specifier = "==0.8.0" },
-    { name = "keboola-component", specifier = "==1.4.0" },
+    { name = "keboola-component", specifier = ">=1.4.0" },
     { name = "keboola-utils", specifier = ">=1.1.0" },
     { name = "pyhocon", specifier = "~=0.3.59" },
-    { name = "requests", specifier = "~=2.28.1" },
+    { name = "requests", specifier = ">=2.28.1" },
 ]
 
 [package.metadata.requires-dev]
@@ -358,16 +358,16 @@ dev = [
 
 [[package]]
 name = "keboola-component"
-version = "1.4.0"
+version = "1.10.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "deprecated" },
+    { name = "keboola-vcr" },
     { name = "pygelf" },
-    { name = "pytz" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d9/91/1886a1d50af303d843f115011b3ffea5208d4e9b0144d1a6b981225b0948/keboola.component-1.4.0.tar.gz", hash = "sha256:df8ca3c808c0a051d3a25859ea159bf119ec73ddcfd9f67124f3718d328a88cd", size = 36655 }
+sdist = { url = "https://files.pythonhosted.org/packages/d2/ae/245a40a051f5b8a27ff4dc8850ca0241173af20ffaf22bc24c2af3f3c257/keboola_component-1.10.0.tar.gz", hash = "sha256:d5cd73110763b3688cfff7061e2bddae8dff63b8f2df3b6a3b90a26a1b73fa7d", size = 72129 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f8/3b/5c1e9351177005d70e12c30458bf76a87f9f11a1b01d8b47f4789c171636/keboola.component-1.4.0-py3-none-any.whl", hash = "sha256:ec420e1ef951dbc8dde68a6e79582f4842f578e796ff549bda158811176c3ddb", size = 32127 },
+    { url = "https://files.pythonhosted.org/packages/84/b0/e4e5eac31a31732ebd88f8f67b9bf3b0b03c23bbc12f28582aa13f9d4db0/keboola_component-1.10.0-py3-none-any.whl", hash = "sha256:d6cb49adfdf9cca602c45565e23e649d9874afec9906e3a7f7fa49755df172f8", size = 44461 },
 ]
 
 [[package]]
@@ -381,6 +381,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a7/b8/ccfddc2eb510f7a6ab878ab8a6249a23494194780a436676da6c2f5d23c7/keboola.utils-1.1.0.tar.gz", hash = "sha256:e943dbda932d945bcd5edd51283eea8f7035249c9dac769d3e96d2f507b52f60", size = 9830 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f9/f4/6697a0c2ff512baa7b84413972e51d5449a0a145f68dc750f05a8b1da39d/keboola.utils-1.1.0-py3-none-any.whl", hash = "sha256:8c73faa4a81f371a2eecd8465b08a51b3f7608969dd91d38d5b3bcfad7ef0da5", size = 10131 },
+]
+
+[[package]]
+name = "keboola-vcr"
+version = "0.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "freezegun" },
+    { name = "vcrpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/97/45/deaeec7cedfc9dd2b5018b24a54a4ad14c9eef943a83d6fda625b76aa3ca/keboola_vcr-0.5.0.tar.gz", hash = "sha256:b924d3b897cc1203a26077ed1016f3a1a559cac151ee6b6662ff2398f92128c9", size = 40875 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a4/63/688abe43d0c7185582033496b09a936be4da549ae204bfcbb5d498c0cf39/keboola_vcr-0.5.0-py3-none-any.whl", hash = "sha256:aa1619873944f9b79881d75b50ae3e36d9810a5009a053b074135f9193ac73c3", size = 45055 },
 ]
 
 [[package]]
@@ -617,7 +630,7 @@ wheels = [
 
 [[package]]
 name = "requests"
-version = "2.28.2"
+version = "2.33.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
@@ -625,9 +638,9 @@ dependencies = [
     { name = "idna" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9d/ee/391076f5937f0a8cdf5e53b701ffc91753e87b07d66bae4a09aa671897bf/requests-2.28.2.tar.gz", hash = "sha256:98b1b2782e3c6c4904938b84c0eb932721069dfdb9134313beff7c83c2df24bf", size = 108206 }
+sdist = { url = "https://files.pythonhosted.org/packages/5f/a4/98b9c7c6428a668bf7e42ebb7c79d576a1c3c1e3ae2d47e674b468388871/requests-2.33.1.tar.gz", hash = "sha256:18817f8c57c6263968bc123d237e3b8b08ac046f5456bd1e307ee8f4250d3517", size = 134120 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d2/f4/274d1dbe96b41cf4e0efb70cbced278ffd61b5c7bb70338b62af94ccb25b/requests-2.28.2-py3-none-any.whl", hash = "sha256:64299f4909223da747622c030b781c0d7811e359c37124b4bd368fb8c6518baa", size = 62822 },
+    { url = "https://files.pythonhosted.org/packages/d7/8e/7540e8a2036f79a125c1d2ebadf69ed7901608859186c856fa0388ef4197/requests-2.33.1-py3-none-any.whl", hash = "sha256:4e6d1ef462f3626a1f0a0a9c42dd93c63bad33f9f1c1937509b8c5c8718ab56a", size = 64947 },
 ]
 
 [[package]]
@@ -709,11 +722,24 @@ wheels = [
 
 [[package]]
 name = "urllib3"
-version = "1.26.20"
+version = "2.6.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/e4/e8/6ff5e6bc22095cfc59b6ea711b687e2b7ed4bdb373f7eeec370a97d7392f/urllib3-1.26.20.tar.gz", hash = "sha256:40c2dc0c681e47eb8f90e7e27bf6ff7df2e677421fd46756da1161c39ca70d32", size = 307380 }
+sdist = { url = "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz", hash = "sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed", size = 435556 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/33/cf/8435d5a7159e2a9c83a95896ed596f68cf798005fe107cc655b5c5c14704/urllib3-1.26.20-py2.py3-none-any.whl", hash = "sha256:0ed14ccfbf1c30a9072c7ca157e4319b70d65f623e91e7b32fadb2853431016e", size = 144225 },
+    { url = "https://files.pythonhosted.org/packages/39/08/aaaad47bc4e9dc8c725e68f9d04865dbcb2052843ff09c97b08904852d84/urllib3-2.6.3-py3-none-any.whl", hash = "sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4", size = 131584 },
+]
+
+[[package]]
+name = "vcrpy"
+version = "8.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyyaml" },
+    { name = "wrapt" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b3/07/bcfd5ebd7cb308026ab78a353e091bd699593358be49197d39d004e5ad83/vcrpy-8.1.1.tar.gz", hash = "sha256:58e3053e33b423f3594031cb758c3f4d1df931307f1e67928e30cf352df7709f", size = 85770 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3a/d7/f79b05a5d728f8786876a7d75dfb0c5cae27e428081b2d60152fb52f155f/vcrpy-8.1.1-py3-none-any.whl", hash = "sha256:2d16f31ad56493efb6165182dd99767207031b0da3f68b18f975545ede8ac4b9", size = 42445 },
 ]
 
 [[package]]
