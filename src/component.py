@@ -2,11 +2,9 @@
 Template Component main class.
 
 """
-# from typing import List, Tuple
-import json
+
 import logging
 
-import dataconf
 import requests
 from google.auth.exceptions import RefreshError
 from keboola.component.base import ComponentBase, sync_action
@@ -14,18 +12,18 @@ from keboola.component.exceptions import UserException
 from keboola.utils.header_normalizer import DefaultHeaderNormalizer
 
 from configuration import Configuration
-from google_dv360 import GoogleDV360Client, translate_filters, get_filter_table, GoogleDV360ClientException
+from google_dv360 import GoogleDV360Client, GoogleDV360ClientException, get_filter_table, translate_filters
 
 
 class Component(ComponentBase):
     """
-        Extends base class for general Python components. Initializes the CommonInterface
-        and performs configuration validation.
+    Extends base class for general Python components. Initializes the CommonInterface
+    and performs configuration validation.
 
-        For easier debugging the data folder is picked up by default from `../data` path,
-        relative to working directory.
+    For easier debugging the data folder is picked up by default from `../data` path,
+    relative to working directory.
 
-        If `debug` parameter is present in the `config.json`, the default logger is set to verbose DEBUG mode.
+    If `debug` parameter is present in the `config.json`, the default logger is set to verbose DEBUG mode.
     """
 
     def __init__(self):
@@ -47,29 +45,34 @@ class Component(ComponentBase):
         report_id = self.get_existing_report_id(client)
 
         if not report_id:
-            if self.cfg.input_variant == 'report_specification':
-                filters = [(filter_pair.name, filter_pair.value) for filter_pair in
-                           self.cfg.report_specification.filters]
-                report_id = client.create_report(self.generate_query_name(),
-                                                 self.cfg.report_specification.report_type,
-                                                 self.cfg.report_specification.dimensions,
-                                                 self.cfg.report_specification.metrics,
-                                                 filters)
+            if self.cfg.input_variant == "report_specification":
+                filters = [
+                    (filter_pair.name, filter_pair.value) for filter_pair in self.cfg.report_specification.filters
+                ]
+                report_id = client.create_report(
+                    self.generate_query_name(),
+                    self.cfg.report_specification.report_type,
+                    self.cfg.report_specification.dimensions,
+                    self.cfg.report_specification.metrics,
+                    filters,
+                )
             else:
                 report_id = self.cfg.existing_report_id
 
-        logging.info(f'Query used: {report_id}')
+        logging.info(f"Query used: {report_id}")
 
-        report_run_id = client.run_report(report_id,
-                                          self.cfg.time_range.period,
-                                          date_from=self.cfg.time_range.date_from,
-                                          date_to=self.cfg.time_range.date_to)
+        report_run_id = client.run_report(
+            report_id,
+            self.cfg.time_range.period,
+            date_from=self.cfg.time_range.date_from,
+            date_to=self.cfg.time_range.date_to,
+        )
 
         # Response structure is documented here:
         # https://developers.google.com/bid-manager/reference/rest/v2/queries.reports#Report
         report_response = client.wait_report(report_id, report_run_id)
 
-        contents_url = report_response['metadata']['googleCloudStoragePath']
+        contents_url = report_response["metadata"]["googleCloudStoragePath"]
 
         self.write_report(contents_url)
 
@@ -82,7 +85,7 @@ class Component(ComponentBase):
         client = GoogleDV360Client(
             self.configuration.oauth_credentials.appKey,
             self.configuration.oauth_credentials.appSecret,
-            self.configuration.oauth_credentials.data
+            self.configuration.oauth_credentials.data,
         )
         return client
 
@@ -91,23 +94,23 @@ class Component(ComponentBase):
         res = requests.get(url, stream=True, timeout=180)
         res.raise_for_status()
 
-        with open(result_file_path, 'wb') as out:
+        with open(result_file_path, "wb") as out:
             for chunk in res.iter_content(chunk_size=8192):
                 out.write(chunk)
 
     @staticmethod
     def extract_csv_from_raw(raw_file: str, csv_file: str, normalize_header: bool = True):
-        with open(raw_file, 'r') as src, open(csv_file, 'w') as dst:
+        with open(raw_file) as src, open(csv_file, "w") as dst:
             # To ensure compatibility: https://bitbucket.org/kds_consulting_team/kds-team.ex-dv360/pull-requests/10
             if normalize_header:
                 line = src.readline()
                 header_normalizer = DefaultHeaderNormalizer()
                 normalized = header_normalizer.normalize_header(line.split(","))
-                dst.write(', '.join(normalized) + '\n')
+                dst.write(", ".join(normalized) + "\n")
 
             while True:
                 line = src.readline()
-                if not line or line.startswith(',') or line == '\n':
+                if not line or line.startswith(",") or line == "\n":
                     break
                 dst.write(line)
 
@@ -120,28 +123,30 @@ class Component(ComponentBase):
         Returns: no value returned
 
         """
-        pks_raw = self.cfg.destination.primary_key_existing if self.cfg.input_variant == 'existing_report_id' else \
-            self.cfg.destination.primary_key
+        pks_raw = (
+            self.cfg.destination.primary_key_existing
+            if self.cfg.input_variant == "existing_report_id"
+            else self.cfg.destination.primary_key
+        )
         header_normalizer = DefaultHeaderNormalizer()
-        pks = header_normalizer.normalize_header(translate_filters(pks_raw))
-        result_table = self.create_out_table_definition(f"{self.cfg.destination.table_name}.csv",
-                                                        primary_key=pks,
-                                                        incremental=self.cfg.destination.incremental_loading)
+        pks = header_normalizer.normalize_header(translate_filters(pks_raw or []))
+        result_table = self.create_out_table_definition(
+            f"{self.cfg.destination.table_name}.csv",
+            primary_key=pks,
+            incremental=self.cfg.destination.incremental_loading,
+        )
         self.write_manifest(result_table)
 
-        raw_output_file = self.files_out_path + '/' + result_table.name + '.raw.txt'
+        raw_output_file = self.files_out_path + "/" + result_table.name + ".raw.txt"
         self.download_file(contents_url, raw_output_file)
         self.extract_csv_from_raw(raw_output_file, result_table.full_path, self.cfg.destination.normalize_header)
 
     def save_state(self, report_response):
-        cur_state = dict(
-            report=report_response,
-            configuration=json.loads(dataconf.dumps(self.cfg, out="json"))
-        )
+        cur_state = dict(report=report_response, configuration=self.cfg.model_dump(mode="json"))
         self.write_state_file(cur_state)
 
     def get_existing_report_id(self, client):
-        """ Retrieves existing query ID
+        """Retrieves existing query ID
 
         Decide whether we may use already existing query generated previously.
         If state contains configuration identical to current configuration we check
@@ -155,14 +160,14 @@ class Component(ComponentBase):
 
         """
         prev_state = self.get_state_file()
-        if not prev_state.get('configuration') or not prev_state.get('report'):
+        if not prev_state.get("configuration") or not prev_state.get("report"):
             return None
-        prev_report_id = prev_state['report']['key']['queryId']
-        prev_cfg = Configuration.fromDict(prev_state.get('configuration'))
+        prev_report_id = prev_state["report"]["key"]["queryId"]
+        prev_cfg = Configuration.fromDict(prev_state.get("configuration"))
         # DV360 queries are scoped to account state at creation time.
         # New Partners/Advertisers added after query creation are silently excluded.
         # Always create a fresh query so the current account structure is reflected.
-        if self.cfg.input_variant == 'report_specification':
+        if self.cfg.input_variant == "report_specification":
             return None
         if prev_cfg == self.cfg:
             # check for query existence
@@ -173,43 +178,49 @@ class Component(ComponentBase):
     def generate_query_name(self):
         # TODO: Currently Keboola has an issue: It does not pass row-id in variables, we use a workaround:
         import os
-        configrow_id = os.getenv('KBC_CONFIGROWID', 'xxxxxx')
-        return 'keboola_generated_' + self.environment_variables.project_id + '_' + \
-            self.environment_variables.config_id + '_' + \
-            configrow_id
 
-    @sync_action('list_queries')
+        configrow_id = os.getenv("KBC_CONFIGROWID", "xxxxxx")
+        return (
+            "keboola_generated_"
+            + self.environment_variables.project_id
+            + "_"
+            + self.environment_variables.config_id
+            + "_"
+            + configrow_id
+        )
+
+    @sync_action("list_queries")
     def list_queries(self):
-        """ A sync action used by Keboola GUI to provide available report (query) IDs for Report ID field.
+        """A sync action used by Keboola GUI to provide available report (query) IDs for Report ID field.
 
         Returns: List of dictionaries having value and label attributes.
         """
         client = self._get_google_client()
         queries = client.list_queries()
         # wish was to include query creation date but tha info is not available in the service
-        resp = [dict(value=q[0], label=f'{q[0]} - {q[1]}') for q in queries]
+        resp = [dict(value=q[0], label=f"{q[0]} - {q[1]}") for q in queries]
         return resp
 
-    @sync_action('list_report_dimensions')
+    @sync_action("list_report_dimensions")
     def list_report_dimensions(self):
-        """ A sync action used by Keboola GUI to provide available dimensions for existing report (query)
+        """A sync action used by Keboola GUI to provide available dimensions for existing report (query)
 
         Returns: List of dictionaries having value and label attributes.
         """
-        existing_report_id = self.configuration.parameters.get('existing_report_id')
+        existing_report_id = self.configuration.parameters.get("existing_report_id")
         if not existing_report_id:
-            raise UserException('No report ID provided.')
+            raise UserException("No report ID provided.")
         client = self._get_google_client()
         query = client.get_query(query_id=existing_report_id)
         if not query:
-            raise UserException(f'Report id = {existing_report_id} was not found')
+            raise UserException(f"Report id = {existing_report_id} was not found")
         table = get_filter_table()
         resp = [dict(value=f, label=table.get(f)) for f in query["params"]["groupBys"]]
         return resp
 
-    @sync_action('validate_query')
+    @sync_action("validate_query")
     def validate_query(self):
-        """ A sync action used by Keboola GUI to check validity of entered data.
+        """A sync action used by Keboola GUI to check validity of entered data.
         Method uses GUI data and tries to create a query calling the service.
         If service succeeds report specification is considered valid.
         Created query is immediately deleted as it need not be the final specification.
@@ -219,31 +230,31 @@ class Component(ComponentBase):
         Raises: Exception when create query failed
 
         """
-        report_specification = self.configuration.parameters.get('report_specification')
+        report_specification = self.configuration.parameters.get("report_specification")
         if not report_specification:
-            raise UserException('No report specification in configuration parameters')
-        report_type = report_specification.get('report_type')
-        dimensions = report_specification.get('dimensions')
-        metrics = report_specification.get('metrics')
-        filters = report_specification.get('filters')
-        filters = [(filter_pair.get('name'), filter_pair.get('value')) for filter_pair in filters]
+            raise UserException("No report specification in configuration parameters")
+        report_type = report_specification.get("report_type")
+        dimensions = report_specification.get("dimensions")
+        metrics = report_specification.get("metrics")
+        filters = report_specification.get("filters")
+        filters = [(filter_pair.get("name"), filter_pair.get("value")) for filter_pair in filters]
 
         client = self._get_google_client()
 
-        report_id = client.create_report('just_dummy_2_delete', report_type, dimensions, metrics, filters)
+        report_id = client.create_report("just_dummy_2_delete", report_type, dimensions, metrics, filters)
 
         client.delete_query(report_id)
 
     def _validate_configuration(self):
         errors = []
-        if self.cfg.input_variant == 'report_specification':
+        if self.cfg.input_variant == "report_specification":
             if not self.cfg.report_specification.metrics:
                 errors.append("At least one metric needs to be specified!")
             if not self.cfg.report_specification.dimensions:
                 errors.append("At least one dimension needs to be specified!")
         if errors:
-            err_string = '\n'.join(errors)
-            raise UserException(f'The configuration is not valid, following errors occurred: \n{err_string}')
+            err_string = "\n".join(errors)
+            raise UserException(f"The configuration is not valid, following errors occurred: \n{err_string}")
 
 
 """
