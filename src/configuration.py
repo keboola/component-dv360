@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated, TypeVar
+
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
+
+T = TypeVar("T")
+DefaultList = Annotated[list[T], BeforeValidator(lambda v: v or [])]
 
 
 class _Base(BaseModel):
@@ -15,8 +20,8 @@ class FilterPair(_Base):
 class Destination(_Base):
     table_name: str
     incremental_loading: bool = True
-    primary_key: list[str] = Field(default_factory=list)
-    primary_key_existing: list[str] = Field(default_factory=list)
+    primary_key: DefaultList[str] = Field(default_factory=list)
+    primary_key_existing: DefaultList[str] = Field(default_factory=list)
     normalize_header: bool = True
 
 
@@ -28,9 +33,9 @@ class TimeRange(_Base):
 
 class ReportSettings(_Base):
     report_type: str = ""
-    dimensions: list[str] = Field(default_factory=list)
-    metrics: list[str] = Field(default_factory=list)
-    filters: list[FilterPair] = Field(default_factory=list)
+    dimensions: DefaultList[str] = Field(default_factory=list)
+    metrics: DefaultList[str] = Field(default_factory=list)
+    filters: DefaultList[FilterPair] = Field(default_factory=list)
 
 
 class Configuration(_Base):
