@@ -1,148 +1,56 @@
-from dataclasses import dataclass, field
+from __future__ import annotations
 
-import dataconf
-from pyhocon.config_tree import ConfigTree
+from pydantic import BaseModel, ConfigDict, Field
 
 
-@dataclass
-class FilterPair:
+class _Base(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+
+class FilterPair(_Base):
     name: str
     value: str
 
 
-@dataclass
-class Destination:
+class Destination(_Base):
     table_name: str
     incremental_loading: bool = True
-    primary_key: list[str] = None
-    primary_key_existing: list[str] = None
+    primary_key: list[str] = Field(default_factory=list)
+    primary_key_existing: list[str] = Field(default_factory=list)
     normalize_header: bool = True
 
 
-@dataclass
-class TimeRange:
+class TimeRange(_Base):
     period: str
     date_from: str = ""
     date_to: str = ""
 
 
-@dataclass
-class ReportSettings:
+class ReportSettings(_Base):
     report_type: str = ""
-    dimensions: list[str] = None
-    metrics: list[str] = None
-    filters: list[FilterPair] = None
+    dimensions: list[str] = Field(default_factory=list)
+    metrics: list[str] = Field(default_factory=list)
+    filters: list[FilterPair] = Field(default_factory=list)
 
 
-class ConfigurationBase:
-    @staticmethod
-    def fromDict(parameters: dict):
-        return dataconf.dict(parameters, Configuration, ignore_unexpected=True)
-        pass
-
-
-@dataclass
-class Configuration(ConfigurationBase):
+class Configuration(_Base):
     input_variant: str
     destination: Destination
     time_range: TimeRange
-    report_specification: ReportSettings = field(default_factory=lambda: ConfigTree({}))
+    report_specification: ReportSettings = Field(default_factory=ReportSettings)
     existing_report_id: str = ""
     debug: bool = False
 
-    def __eq__(self, other):
+    @staticmethod
+    def fromDict(parameters: dict) -> Configuration:
+        return Configuration.model_validate(parameters)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Configuration):
+            return NotImplemented
         if self.input_variant == "existing_report_id":
             return self.existing_report_id == other.existing_report_id
-        else:
-            return self.report_specification == other.report_specification
+        return self.report_specification == other.report_specification
 
-
-if __name__ == "__main__":
-    json_conf_1 = """
-    {
-      "input_variant": "report_specification",
-      "existing_report_id": ""
-      "time_range": {
-        "period": "LAST_90_DAYS"
-        "date_from": "yesterday"
-        "date_to": "dneska"
-      },
-      "report_specification": {
-        "report_type": "STANDARD",
-        "dimensions": [
-          "FILTER_ADVERTISER",
-          "FILTER_ADVERTISER_NAME",
-          "FILTER_BROWSER"
-        ],
-        "metrics": ["METRIC_CLICKS", "METRIC_COUNTERS", "METRIC_ENGAGEMENTS"],
-        "filters": [ {
-              "name": "FILTER_ADVERTISER",
-              "value": "630317194"
-            }]
-      },
-      "destination": {
-        "table_name": "report_row_1.csv",
-        "incremental_loading": true,
-        "primary_key": [
-          "FILTER_ADVERTISER",
-          "FILTER_BROWSER"
-        ]
-      },
-      "debug": true,
-      "dalsi_parametr": 12
-    }
-    """
-
-    json_conf_2 = """
-    {
-      "input_variant": "report_specification",
-      "existing_report_id": ""
-      "time_range": {
-        "period": "LAST_90_DAYS"
-        "date_from": "yesterday"
-        "date_to": "dneska"
-      },
-      "report_specification": {
-        "report_type": "STANDARD",
-        "dimensions": [
-          "FILTER_ADVERTISER",
-          "FILTER_ADVERTISER_NAME",
-          "FILTER_BROWSER"
-        ],
-        "metrics": ["METRIC_CLICKS", "METRIC_COUNTERS", "METRIC_ENGAGEMENTS"],
-        "filters": [ {
-              "name": "FILTER_ADVERTISER",
-              "value": "630317194"
-            }]
-      },
-      "destination": {
-        "table_name": "report_row_1.csv",
-        "incremental_loading": true,
-        "primary_key": [
-          "FILTER_ADVERTISER",
-          "FILTER_BROWSER"
-        ]
-      },
-      "debug": true,
-      "dalsi_parametr": 12
-    }
-        """
-
-    # cf1 = dataconf.loads(json_conf_1, Configuration)
-    cf2 = dataconf.loads(json_conf_2, Configuration, ignore_unexpected=True)
-
-    # print(f'Equality cf1 == cf2 {cf1 == cf2}')
-
-    pars = {
-        "input_variant": "report_specification",
-        "time_range": {"period": "LAST_90_DAYS", "date_from": "yesterday", "date_to": "dneska"},
-        "destination": {
-            "table_name": "report_row_1.csv",
-            "primary_key": ["FILTER_ADVERTISER", "FILTER_BROWSER"],
-            "incremental_loading": True,
-        },
-    }
-
-    cf3 = Configuration.fromDict(pars)
-
-    pass
+    def __hash__(self) -> int:
+        return hash((self.input_variant, self.existing_report_id))

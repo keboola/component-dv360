@@ -3,11 +3,8 @@ Template Component main class.
 
 """
 
-# from typing import List, Tuple
-import json
 import logging
 
-import dataconf
 import requests
 from google.auth.exceptions import RefreshError
 from keboola.component.base import ComponentBase, sync_action
@@ -145,7 +142,7 @@ class Component(ComponentBase):
         self.extract_csv_from_raw(raw_output_file, result_table.full_path, self.cfg.destination.normalize_header)
 
     def save_state(self, report_response):
-        cur_state = dict(report=report_response, configuration=json.loads(dataconf.dumps(self.cfg, out="json")))
+        cur_state = dict(report=report_response, configuration=self.cfg.model_dump(mode="json"))
         self.write_state_file(cur_state)
 
     def get_existing_report_id(self, client):
