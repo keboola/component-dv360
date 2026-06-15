@@ -1,1 +1,1 @@
-Google Display & Video 360 is an integrated solution for end-to-end advertising campaigns.
+Extracts Display & Video 360 reports.
