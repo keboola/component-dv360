@@ -1,1 +1,1 @@
-https://github.com/keboola/kds-team.ex-dv360
+https://github.com/keboola/component-dv360

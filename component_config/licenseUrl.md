@@ -1,1 +1,1 @@
-https://github.com/keboola/kds-team.ex-dv360/blob/master/LICENSE.md
+https://github.com/keboola/component-dv360/blob/main/LICENSE.md

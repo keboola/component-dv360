@@ -1,1 +1,1 @@
-https://github.com/keboola/kds-team.ex-dv360/blob/master/README.md
+https://github.com/keboola/component-dv360/blob/main/README.md
