@@ -112,6 +112,33 @@ class GoogleDV360Client:
         report_id = response["queryId"]
         return report_id
 
+    def _execute_with_retry(self, request, attempts: int = 5):
+        """Execute a googleapiclient request, retrying transient server-side errors.
+
+        Retries HTTP 429 and 5xx responses with exponential backoff and re-raises the
+        last error once the attempts are exhausted, so a persistent outage still fails
+        the job. Any non-transient error (e.g. 4xx) is raised immediately for the caller
+        to handle. On the happy path the request succeeds on the first attempt and the
+        behaviour is identical to a plain ``request.execute()``.
+        """
+        delay = 2
+        for attempt in range(1, attempts + 1):
+            try:
+                return request.execute()
+            except HttpError as e:
+                is_transient = e.status_code == 429 or 500 <= e.status_code < 600
+                if attempt == attempts or not is_transient:
+                    raise
+                logging.warning(
+                    "Transient DV360 API error (HTTP %s), retry %d/%d in %ds",
+                    e.status_code,
+                    attempt,
+                    attempts,
+                    delay,
+                )
+                time.sleep(delay)
+                delay = min(delay * 2, 30)
+
     def run_report(self, report_id: str, data_range: str, date_from=None, date_to=None):
         """Run a specific query within specified date range.
 
@@ -131,7 +158,7 @@ class GoogleDV360Client:
             )
         try:
             m = self.service.queries().run(body=body, queryId=report_id)
-            response = m.execute()
+            response = self._execute_with_retry(m)
             run_id = response["key"]["reportId"]
             logging.info(f"Running query : {report_id}:{run_id}")
             return run_id
